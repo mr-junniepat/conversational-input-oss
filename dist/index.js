@@ -2,7 +2,7 @@
 
 Object.defineProperty(exports, '__esModule', { value: true });
 
-var require$$0 = require('react');
+var React = require('react');
 var lucideReact = require('lucide-react');
 
 var jsxRuntime = {exports: {}};
@@ -342,7 +342,7 @@ function requireReactJsxRuntime_development () {
 	        node._store &&
 	        (node._store.validated = 1);
 	    }
-	    var React = require$$0,
+	    var React$1 = React,
 	      REACT_ELEMENT_TYPE = Symbol.for("react.transitional.element"),
 	      REACT_PORTAL_TYPE = Symbol.for("react.portal"),
 	      REACT_FRAGMENT_TYPE = Symbol.for("react.fragment"),
@@ -358,7 +358,7 @@ function requireReactJsxRuntime_development () {
 	      REACT_ACTIVITY_TYPE = Symbol.for("react.activity"),
 	      REACT_CLIENT_REFERENCE = Symbol.for("react.client.reference"),
 	      ReactSharedInternals =
-	        React.__CLIENT_INTERNALS_DO_NOT_USE_OR_WARN_USERS_THEY_CANNOT_UPGRADE,
+	        React$1.__CLIENT_INTERNALS_DO_NOT_USE_OR_WARN_USERS_THEY_CANNOT_UPGRADE,
 	      hasOwnProperty = Object.prototype.hasOwnProperty,
 	      isArrayImpl = Array.isArray,
 	      createTask = console.createTask
@@ -366,15 +366,15 @@ function requireReactJsxRuntime_development () {
 	        : function () {
 	            return null;
 	          };
-	    React = {
+	    React$1 = {
 	      react_stack_bottom_frame: function (callStackForError) {
 	        return callStackForError();
 	      }
 	    };
 	    var specialPropKeyWarningShown;
 	    var didWarnAboutElementRef = {};
-	    var unknownOwnerDebugStack = React.react_stack_bottom_frame.bind(
-	      React,
+	    var unknownOwnerDebugStack = React$1.react_stack_bottom_frame.bind(
+	      React$1,
 	      UnknownOwner
 	    )();
 	    var unknownOwnerDebugTask = createTask(getTaskName(UnknownOwner));
@@ -425,13 +425,13 @@ if (process.env.NODE_ENV === 'production') {
 var jsxRuntimeExports = jsxRuntime.exports;
 
 function useVoiceRecognition() {
-    const [isListening, setIsListening] = require$$0.useState(false);
-    const [transcript, setTranscript] = require$$0.useState('');
-    const [error, setError] = require$$0.useState(null);
-    const [recognition, setRecognition] = require$$0.useState(null);
+    const [isListening, setIsListening] = React.useState(false);
+    const [transcript, setTranscript] = React.useState('');
+    const [error, setError] = React.useState(null);
+    const [recognition, setRecognition] = React.useState(null);
     const isSupported = typeof window !== 'undefined' &&
         (window.SpeechRecognition || window.webkitSpeechRecognition);
-    require$$0.useEffect(() => {
+    React.useEffect(() => {
         if (!isSupported)
             return;
         const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
@@ -467,7 +467,7 @@ function useVoiceRecognition() {
             }
         };
     }, [isSupported]);
-    const startListening = require$$0.useCallback(() => {
+    const startListening = React.useCallback(() => {
         if (recognition && !isListening) {
             try {
                 recognition.start();
@@ -477,7 +477,7 @@ function useVoiceRecognition() {
             }
         }
     }, [recognition, isListening]);
-    const stopListening = require$$0.useCallback(() => {
+    const stopListening = React.useCallback(() => {
         if (recognition && isListening) {
             try {
                 recognition.stop();
@@ -487,7 +487,7 @@ function useVoiceRecognition() {
             }
         }
     }, [recognition, isListening]);
-    const resetTranscript = require$$0.useCallback(() => {
+    const resetTranscript = React.useCallback(() => {
         setTranscript('');
     }, []);
     return {
@@ -503,10 +503,10 @@ function useVoiceRecognition() {
 
 function useFileUpload(acceptedTypes = ['*'], maxSize = 10 * 1024 * 1024 // 10MB default
 ) {
-    const [files, setFiles] = require$$0.useState([]);
-    const [isUploading, setIsUploading] = require$$0.useState(false);
-    const [uploadProgress, setUploadProgress] = require$$0.useState(0);
-    const validateFile = require$$0.useCallback((file) => {
+    const [files, setFiles] = React.useState([]);
+    const [isUploading, setIsUploading] = React.useState(false);
+    const [uploadProgress, setUploadProgress] = React.useState(0);
+    const validateFile = React.useCallback((file) => {
         // Check file type
         if (acceptedTypes.length > 0 && !acceptedTypes.includes('*')) {
             const fileExtension = file.name.split('.').pop()?.toLowerCase();
@@ -531,7 +531,7 @@ function useFileUpload(acceptedTypes = ['*'], maxSize = 10 * 1024 * 1024 // 10MB
         }
         return null;
     }, [acceptedTypes, maxSize]);
-    const addFiles = require$$0.useCallback((newFiles) => {
+    const addFiles = React.useCallback((newFiles) => {
         const fileArray = Array.from(newFiles);
         const validFiles = [];
         const errors = [];
@@ -549,20 +549,20 @@ function useFileUpload(acceptedTypes = ['*'], maxSize = 10 * 1024 * 1024 // 10MB
         }
         setFiles(prev => [...prev, ...validFiles]);
     }, [validateFile]);
-    const removeFile = require$$0.useCallback((index) => {
+    const removeFile = React.useCallback((index) => {
         setFiles(prev => prev.filter((_, i) => i !== index));
     }, []);
-    const clearFiles = require$$0.useCallback(() => {
+    const clearFiles = React.useCallback(() => {
         setFiles([]);
     }, []);
-    const updateUploadProgress = require$$0.useCallback((progress) => {
+    const updateUploadProgress = React.useCallback((progress) => {
         setUploadProgress(progress);
     }, []);
-    const startUpload = require$$0.useCallback(() => {
+    const startUpload = React.useCallback(() => {
         setIsUploading(true);
         setUploadProgress(0);
     }, []);
-    const finishUpload = require$$0.useCallback(() => {
+    const finishUpload = React.useCallback(() => {
         setIsUploading(false);
         setUploadProgress(100);
     }, []);
@@ -581,14 +581,32 @@ function useFileUpload(acceptedTypes = ['*'], maxSize = 10 * 1024 * 1024 // 10MB
 }
 
 const ConversationalInput = ({ onSubmit, placeholder = "Start typing or speaking naturally...", requireFiles = false, acceptedFileTypes = ['.pdf', '.doc', '.docx', '.txt'], maxFileSize = 10 * 1024 * 1024, // 10MB
-className = "", showClearButton = true, labels = {}, enableVoice = true, enableFileUpload = true, validateInput, isSubmitting = false, disabled = false, }) => {
-    const [text, setText] = require$$0.useState('');
-    const [error, setError] = require$$0.useState(null);
+className = "", showClearButton = true, labels = {}, enableVoice = true, enableFileUpload = true, showSubmitButton = true, validateInput, isSubmitting = false, disabled = false, initialValue = "", value: controlledValue, onTextChange, onFilesChange, autoSubmitOnEnter = false, submitTrigger = 'both', clearAfterSubmit = true, classNames = {}, render, }) => {
+    const [text, setText] = React.useState(initialValue);
+    const [error, setError] = React.useState(null);
+    const textareaRef = React.useRef(null);
+    // Use controlled value if provided
+    const displayText = controlledValue !== undefined ? controlledValue : text;
     const { isListening, isSupported: voiceSupported, startListening, stopListening, transcript, resetTranscript, } = useVoiceRecognition();
     const { files, addFiles, removeFile: removeFileFromHook, clearFiles, validateFile, } = useFileUpload(acceptedFileTypes, maxFileSize);
     // Merge voice transcript with typed text
-    const displayText = text + (isListening ? transcript : '');
-    const toggleMic = require$$0.useCallback(() => {
+    const fullText = displayText + (isListening ? transcript : '');
+    // Handle text changes
+    const handleTextChange = React.useCallback((newText) => {
+        if (controlledValue === undefined) {
+            setText(newText);
+        }
+        onTextChange?.(newText);
+    }, [controlledValue, onTextChange]);
+    // Handle file changes
+    const handleFilesChange = React.useCallback((newFiles) => {
+        onFilesChange?.(newFiles);
+    }, [onFilesChange]);
+    // Update files when they change
+    React.useEffect(() => {
+        handleFilesChange(files);
+    }, [files, handleFilesChange]);
+    const toggleMic = React.useCallback(() => {
         if (!voiceSupported) {
             setError('Voice input is not supported in this browser');
             return;
@@ -596,14 +614,15 @@ className = "", showClearButton = true, labels = {}, enableVoice = true, enableF
         if (isListening) {
             stopListening();
             // Add the transcript to the main text
-            setText(prev => prev + transcript);
+            const newText = displayText + transcript;
+            handleTextChange(newText);
             resetTranscript();
         }
         else {
             startListening();
         }
-    }, [isListening, voiceSupported, startListening, stopListening, transcript, resetTranscript]);
-    const handleFileUpload = require$$0.useCallback((event) => {
+    }, [isListening, voiceSupported, startListening, stopListening, transcript, resetTranscript, displayText, handleTextChange]);
+    const handleFileUpload = React.useCallback((event) => {
         const selectedFiles = event.target.files;
         if (selectedFiles) {
             addFiles(selectedFiles);
@@ -611,8 +630,8 @@ className = "", showClearButton = true, labels = {}, enableVoice = true, enableF
         // Reset the input value to allow selecting the same file again
         event.target.value = '';
     }, [addFiles]);
-    const handleSubmit = require$$0.useCallback(async () => {
-        if (!displayText.trim()) {
+    const handleSubmit = React.useCallback(async () => {
+        if (!fullText.trim()) {
             setError('Please enter some text before submitting');
             return;
         }
@@ -621,7 +640,7 @@ className = "", showClearButton = true, labels = {}, enableVoice = true, enableF
             return;
         }
         if (validateInput) {
-            const validationError = validateInput(displayText);
+            const validationError = validateInput(fullText);
             if (validationError) {
                 setError(validationError);
                 return;
@@ -629,24 +648,39 @@ className = "", showClearButton = true, labels = {}, enableVoice = true, enableF
         }
         setError(null);
         try {
-            await onSubmit(displayText, files);
-            // Clear form after successful submission
-            setText('');
-            clearFiles();
-            resetTranscript();
+            await onSubmit(fullText, files);
+            // Clear form after successful submission if enabled
+            if (clearAfterSubmit) {
+                if (controlledValue === undefined) {
+                    setText('');
+                }
+                clearFiles();
+                resetTranscript();
+            }
         }
         catch (err) {
             setError(err instanceof Error ? err.message : 'Submission failed');
         }
-    }, [displayText, files, requireFiles, validateInput, onSubmit, clearFiles, resetTranscript]);
-    const clearText = require$$0.useCallback(() => {
-        setText('');
+    }, [fullText, files, requireFiles, validateInput, onSubmit, clearAfterSubmit, controlledValue, clearFiles, resetTranscript]);
+    const clearText = React.useCallback(() => {
+        if (controlledValue === undefined) {
+            setText('');
+        }
         resetTranscript();
         setError(null);
-    }, [resetTranscript]);
-    const handleRemoveFile = require$$0.useCallback((index) => {
+    }, [controlledValue, resetTranscript]);
+    const handleRemoveFile = React.useCallback((index) => {
         removeFileFromHook(index);
     }, [removeFileFromHook]);
+    // Handle Enter key for auto-submit
+    const handleKeyDown = React.useCallback((event) => {
+        if (event.key === 'Enter' && (event.ctrlKey || event.metaKey)) {
+            event.preventDefault();
+            if (submitTrigger === 'enter' || submitTrigger === 'both') {
+                handleSubmit();
+            }
+        }
+    }, [handleSubmit, submitTrigger]);
     const defaultLabels = {
         submit: 'Submit',
         clear: 'Clear text',
@@ -656,10 +690,414 @@ className = "", showClearButton = true, labels = {}, enableVoice = true, enableF
         cvReady: 'File Ready ✓',
     };
     const finalLabels = { ...defaultLabels, ...labels };
-    return (jsxRuntimeExports.jsxs("div", { className: `w-full max-w-3xl mx-auto ${className}`, children: [jsxRuntimeExports.jsxs("div", { className: "bg-white rounded-2xl shadow-lg border border-gray-200 overflow-hidden", children: [jsxRuntimeExports.jsxs("div", { className: "relative", children: [jsxRuntimeExports.jsx("textarea", { className: `w-full h-[40vh] p-6 text-xl resize-none text-gray-900 placeholder-gray-500 border-none focus:outline-none ${isListening ? 'bg-green-50' : 'bg-white'} ${disabled ? 'opacity-50 cursor-not-allowed' : ''}`, placeholder: placeholder, value: displayText, onChange: e => setText(e.target.value), disabled: disabled || isSubmitting }), isListening && (jsxRuntimeExports.jsxs("div", { className: "absolute top-4 right-4 flex items-center gap-2 bg-green-100 text-green-700 px-3 py-1 rounded-full text-sm font-medium", children: [jsxRuntimeExports.jsx("div", { className: "w-2 h-2 bg-green-500 rounded-full animate-pulse" }), finalLabels.listening] }))] }), jsxRuntimeExports.jsx("div", { className: "border-t border-gray-200" }), jsxRuntimeExports.jsxs("div", { className: "p-4 flex items-center justify-between", children: [jsxRuntimeExports.jsxs("div", { className: "flex items-center gap-3", children: [enableFileUpload && (jsxRuntimeExports.jsxs("div", { className: "flex items-center gap-2", children: [jsxRuntimeExports.jsx("input", { type: "file", id: "file-upload", accept: acceptedFileTypes.join(','), onChange: handleFileUpload, className: "hidden", multiple: true, disabled: disabled || isSubmitting }), jsxRuntimeExports.jsxs("label", { htmlFor: "file-upload", className: `cursor-pointer flex items-center gap-2 px-4 py-2 rounded-lg border border-gray-200 bg-white text-gray-700 hover:bg-gray-50 transition-colors text-sm font-medium ${disabled || isSubmitting ? 'opacity-50 cursor-not-allowed' : ''}`, children: [jsxRuntimeExports.jsx(lucideReact.Upload, { className: "w-4 h-4" }), finalLabels.addAttachments] })] })), enableVoice && voiceSupported && (jsxRuntimeExports.jsxs("button", { onClick: toggleMic, disabled: disabled || isSubmitting, className: `flex items-center gap-2 px-4 py-2 rounded-lg border border-gray-200 bg-white text-gray-700 hover:bg-gray-50 transition-colors text-sm font-medium ${isListening ? 'border-green-300 bg-green-50 text-green-700' : ''} ${disabled || isSubmitting ? 'opacity-50 cursor-not-allowed' : ''}`, "aria-pressed": isListening, children: [jsxRuntimeExports.jsx(lucideReact.Mic, { className: "w-4 h-4" }), finalLabels.useVoice] }))] }), jsxRuntimeExports.jsxs("div", { className: "flex items-center gap-3", children: [showClearButton && displayText && (jsxRuntimeExports.jsx("button", { onClick: clearText, disabled: disabled || isSubmitting, className: "px-4 py-2 rounded-lg border border-gray-200 bg-white text-gray-700 hover:bg-gray-50 transition-colors text-sm font-medium disabled:opacity-50", children: finalLabels.clear })), jsxRuntimeExports.jsx("button", { onClick: handleSubmit, disabled: !displayText.trim() || (requireFiles && files.length === 0) || isSubmitting || disabled, className: "px-6 py-2 rounded-lg bg-gray-800 text-white hover:bg-gray-900 transition-colors text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed", children: isSubmitting ? (jsxRuntimeExports.jsxs(jsxRuntimeExports.Fragment, { children: [jsxRuntimeExports.jsx(lucideReact.Loader2, { className: "w-4 h-4 animate-spin inline mr-2" }), "Processing..."] })) : (finalLabels.submit) })] })] })] }), error && (jsxRuntimeExports.jsx("div", { className: "mt-4 p-3 bg-red-100 border border-red-300 rounded-lg text-red-700 text-sm", children: error })), files.length > 0 && (jsxRuntimeExports.jsx("div", { className: "mt-4 space-y-2", children: files.map((file, index) => (jsxRuntimeExports.jsxs("div", { className: "flex items-center gap-2 px-4 py-3 rounded-xl border-2 border-green-300 bg-green-50 text-green-700", children: [jsxRuntimeExports.jsx(lucideReact.FileText, { className: "w-4 h-4" }), jsxRuntimeExports.jsx("span", { className: "text-sm font-medium", children: file.name }), jsxRuntimeExports.jsx("button", { onClick: () => handleRemoveFile(index), className: "ml-2 p-1 text-green-600 hover:text-green-800 transition-colors", disabled: disabled || isSubmitting, children: jsxRuntimeExports.jsx(lucideReact.XCircle, { className: "w-3 h-3" }) })] }, index))) })), enableVoice && !voiceSupported && (jsxRuntimeExports.jsx("div", { className: "mt-4 p-3 bg-yellow-100 border border-yellow-300 rounded-lg text-yellow-700 text-sm", children: "Voice input is not supported in this browser. Please use text input instead." }))] }));
+    // Determine if submit should be disabled
+    const isSubmitDisabled = !fullText.trim() ||
+        (requireFiles && files.length === 0) ||
+        isSubmitting ||
+        disabled ||
+        submitTrigger === 'none';
+    // Render custom components if provided
+    const renderVoiceButton = () => {
+        if (!enableVoice || !voiceSupported)
+            return null;
+        if (render?.voiceButton) {
+            return render.voiceButton({
+                isListening,
+                isSupported: voiceSupported,
+                onClick: toggleMic,
+                disabled: disabled || isSubmitting,
+                className: classNames.voiceButton || "flex items-center gap-2 px-4 py-2 rounded-lg border border-gray-200 bg-white text-gray-700 hover:bg-gray-50 transition-colors text-sm font-medium"
+            });
+        }
+        return (jsxRuntimeExports.jsxs("button", { onClick: toggleMic, disabled: disabled || isSubmitting, className: `flex items-center gap-2 px-4 py-2 rounded-lg border border-gray-200 bg-white text-gray-700 hover:bg-gray-50 transition-colors text-sm font-medium ${isListening ? 'border-green-300 bg-green-50 text-green-700' : ''} ${disabled || isSubmitting ? 'opacity-50 cursor-not-allowed' : ''}`, "aria-pressed": isListening, children: [jsxRuntimeExports.jsx(lucideReact.Mic, { className: "w-4 h-4" }), finalLabels.useVoice] }));
+    };
+    const renderFileButton = () => {
+        if (!enableFileUpload)
+            return null;
+        if (render?.fileButton) {
+            return render.fileButton({
+                onClick: () => textareaRef.current?.querySelector('input[type="file"]')?.click(),
+                disabled: disabled || isSubmitting,
+                className: classNames.fileButton || "cursor-pointer flex items-center gap-2 px-4 py-2 rounded-lg border border-gray-200 bg-white text-gray-700 hover:bg-gray-50 transition-colors text-sm font-medium",
+                acceptedTypes: acceptedFileTypes
+            });
+        }
+        return (jsxRuntimeExports.jsxs("div", { className: "flex items-center gap-2", children: [jsxRuntimeExports.jsx("input", { type: "file", id: "file-upload", accept: acceptedFileTypes.join(','), onChange: handleFileUpload, className: "hidden", multiple: true, disabled: disabled || isSubmitting }), jsxRuntimeExports.jsxs("label", { htmlFor: "file-upload", className: `cursor-pointer flex items-center gap-2 px-4 py-2 rounded-lg border border-gray-200 bg-white text-gray-700 hover:bg-gray-50 transition-colors text-sm font-medium ${disabled || isSubmitting ? 'opacity-50 cursor-not-allowed' : ''}`, children: [jsxRuntimeExports.jsx(lucideReact.Upload, { className: "w-4 h-4" }), finalLabels.addAttachments] })] }));
+    };
+    const renderSubmitButton = () => {
+        if (!showSubmitButton)
+            return null;
+        if (render?.submitButton) {
+            return render.submitButton({
+                onClick: handleSubmit,
+                disabled: isSubmitDisabled,
+                className: classNames.submitButton || "px-6 py-2 rounded-lg bg-gray-800 text-white hover:bg-gray-900 transition-colors text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed",
+                isSubmitting,
+                text: finalLabels.submit
+            });
+        }
+        return (jsxRuntimeExports.jsx("button", { onClick: handleSubmit, disabled: isSubmitDisabled, className: "px-6 py-2 rounded-lg bg-gray-800 text-white hover:bg-gray-900 transition-colors text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed", children: isSubmitting ? (jsxRuntimeExports.jsxs(jsxRuntimeExports.Fragment, { children: [jsxRuntimeExports.jsx(lucideReact.Loader2, { className: "w-4 h-4 animate-spin inline mr-2" }), "Processing..."] })) : (finalLabels.submit) }));
+    };
+    const renderClearButton = () => {
+        if (!showClearButton || !fullText)
+            return null;
+        if (render?.clearButton) {
+            return render.clearButton({
+                onClick: clearText,
+                disabled: disabled || isSubmitting,
+                className: classNames.clearButton || "px-4 py-2 rounded-lg border border-gray-200 bg-white text-gray-700 hover:bg-gray-50 transition-colors text-sm font-medium disabled:opacity-50"
+            });
+        }
+        return (jsxRuntimeExports.jsx("button", { onClick: clearText, disabled: disabled || isSubmitting, className: "px-4 py-2 rounded-lg border border-gray-200 bg-white text-gray-700 hover:bg-gray-50 transition-colors text-sm font-medium disabled:opacity-50", children: finalLabels.clear }));
+    };
+    const renderFileDisplay = () => {
+        if (files.length === 0)
+            return null;
+        if (render?.fileDisplay) {
+            return render.fileDisplay({
+                files,
+                onRemove: handleRemoveFile,
+                disabled: disabled || isSubmitting,
+                className: classNames.fileDisplay || "mt-4 space-y-2"
+            });
+        }
+        return (jsxRuntimeExports.jsx("div", { className: "mt-4 space-y-2", children: files.map((file, index) => (jsxRuntimeExports.jsxs("div", { className: "flex items-center gap-2 px-4 py-3 rounded-xl border-2 border-green-300 bg-green-50 text-green-700", children: [jsxRuntimeExports.jsx(lucideReact.FileText, { className: "w-4 h-4" }), jsxRuntimeExports.jsx("span", { className: "text-sm font-medium", children: file.name }), jsxRuntimeExports.jsx("button", { onClick: () => handleRemoveFile(index), className: "ml-2 p-1 text-green-600 hover:text-green-800 transition-colors", disabled: disabled || isSubmitting, children: jsxRuntimeExports.jsx(lucideReact.XCircle, { className: "w-3 h-3" }) })] }, index))) }));
+    };
+    const renderErrorDisplay = () => {
+        if (!error)
+            return null;
+        if (render?.errorDisplay) {
+            return render.errorDisplay({
+                error,
+                className: classNames.errorDisplay || "mt-4 p-3 bg-red-100 border border-red-300 rounded-lg text-red-700 text-sm"
+            });
+        }
+        return (jsxRuntimeExports.jsx("div", { className: "mt-4 p-3 bg-red-100 border border-red-300 rounded-lg text-red-700 text-sm", children: error }));
+    };
+    return (jsxRuntimeExports.jsxs("div", { className: `w-full max-w-3xl mx-auto ${className} ${classNames.container || ''}`, children: [jsxRuntimeExports.jsxs("div", { className: "bg-white rounded-2xl shadow-lg border border-gray-200 overflow-hidden", children: [jsxRuntimeExports.jsxs("div", { className: "relative", children: [jsxRuntimeExports.jsx("textarea", { ref: textareaRef, className: `w-full h-[40vh] p-6 text-xl resize-none text-gray-900 placeholder-gray-500 border-none focus:outline-none ${isListening ? 'bg-green-50' : 'bg-white'} ${disabled ? 'opacity-50 cursor-not-allowed' : ''} ${classNames.textarea || ''}`, placeholder: placeholder, value: fullText, onChange: e => handleTextChange(e.target.value), onKeyDown: handleKeyDown, disabled: disabled || isSubmitting }), isListening && (jsxRuntimeExports.jsxs("div", { className: "absolute top-4 right-4 flex items-center gap-2 bg-green-100 text-green-700 px-3 py-1 rounded-full text-sm font-medium", children: [jsxRuntimeExports.jsx("div", { className: "w-2 h-2 bg-green-500 rounded-full animate-pulse" }), finalLabels.listening] }))] }), (enableVoice || enableFileUpload || showSubmitButton || (showClearButton && fullText)) && (jsxRuntimeExports.jsxs(jsxRuntimeExports.Fragment, { children: [jsxRuntimeExports.jsx("div", { className: "border-t border-gray-200" }), jsxRuntimeExports.jsxs("div", { className: `p-4 flex items-center justify-between ${classNames.actionBar || ''}`, children: [jsxRuntimeExports.jsxs("div", { className: "flex items-center gap-3", children: [renderFileButton(), renderVoiceButton()] }), jsxRuntimeExports.jsxs("div", { className: "flex items-center gap-3", children: [renderClearButton(), renderSubmitButton()] })] })] }))] }), renderErrorDisplay(), renderFileDisplay(), enableVoice && !voiceSupported && (jsxRuntimeExports.jsx("div", { className: "mt-4 p-3 bg-yellow-100 border border-yellow-300 rounded-lg text-yellow-700 text-sm", children: "Voice input is not supported in this browser. Please use text input instead." }))] }));
 };
 
+const Clarifier = ({ question, type = 'info', show = true, onClarify, suggestions = [], showInput = true, inputPlaceholder = "Please provide more details...", className = "", dismissible = false, onDismiss, }) => {
+    const [response, setResponse] = React.useState('');
+    const [isExpanded, setIsExpanded] = React.useState(false);
+    if (!show)
+        return null;
+    const handleSubmit = (e) => {
+        e.preventDefault();
+        if (response.trim() && onClarify) {
+            onClarify(response.trim());
+            setResponse('');
+        }
+    };
+    const handleSuggestionClick = (suggestion) => {
+        if (onClarify) {
+            onClarify(suggestion);
+        }
+    };
+    const getTypeStyles = () => {
+        switch (type) {
+            case 'warning':
+                return 'bg-yellow-50 border-yellow-200 text-yellow-800';
+            case 'error':
+                return 'bg-red-50 border-red-200 text-red-800';
+            case 'success':
+                return 'bg-green-50 border-green-200 text-green-800';
+            default:
+                return 'bg-blue-50 border-blue-200 text-blue-800';
+        }
+    };
+    const getIcon = () => {
+        switch (type) {
+            case 'warning':
+                return jsxRuntimeExports.jsx(lucideReact.AlertCircle, { className: "w-5 h-5 text-yellow-600" });
+            case 'error':
+                return jsxRuntimeExports.jsx(lucideReact.AlertCircle, { className: "w-5 h-5 text-red-600" });
+            case 'success':
+                return jsxRuntimeExports.jsx(lucideReact.CheckCircle, { className: "w-5 h-5 text-green-600" });
+            default:
+                return jsxRuntimeExports.jsx(lucideReact.HelpCircle, { className: "w-5 h-5 text-blue-600" });
+        }
+    };
+    return (jsxRuntimeExports.jsx("div", { className: `rounded-lg border p-4 ${getTypeStyles()} ${className}`, children: jsxRuntimeExports.jsxs("div", { className: "flex items-start gap-3", children: [getIcon(), jsxRuntimeExports.jsxs("div", { className: "flex-1 min-w-0", children: [jsxRuntimeExports.jsxs("div", { className: "flex items-start justify-between gap-2", children: [jsxRuntimeExports.jsx("p", { className: "text-sm font-medium leading-relaxed", children: question }), dismissible && onDismiss && (jsxRuntimeExports.jsx("button", { onClick: onDismiss, className: "flex-shrink-0 p-1 hover:bg-white/20 rounded transition-colors", "aria-label": "Dismiss", children: jsxRuntimeExports.jsx("svg", { className: "w-4 h-4", fill: "none", stroke: "currentColor", viewBox: "0 0 24 24", children: jsxRuntimeExports.jsx("path", { strokeLinecap: "round", strokeLinejoin: "round", strokeWidth: 2, d: "M6 18L18 6M6 6l12 12" }) }) }))] }), suggestions.length > 0 && (jsxRuntimeExports.jsxs("div", { className: "mt-3", children: [jsxRuntimeExports.jsx("p", { className: "text-xs font-medium mb-2 opacity-75", children: "Suggested responses:" }), jsxRuntimeExports.jsx("div", { className: "flex flex-wrap gap-2", children: suggestions.map((suggestion, index) => (jsxRuntimeExports.jsx("button", { onClick: () => handleSuggestionClick(suggestion), className: "px-3 py-1 text-xs bg-white/50 hover:bg-white/70 rounded-full border border-current/20 transition-colors", children: suggestion }, index))) })] })), showInput && (jsxRuntimeExports.jsx("form", { onSubmit: handleSubmit, className: "mt-3", children: jsxRuntimeExports.jsxs("div", { className: "flex gap-2", children: [jsxRuntimeExports.jsx("input", { type: "text", value: response, onChange: (e) => setResponse(e.target.value), placeholder: inputPlaceholder, className: "flex-1 px-3 py-2 text-sm bg-white/70 border border-current/20 rounded-md focus:outline-none focus:ring-2 focus:ring-current/40 focus:border-transparent" }), jsxRuntimeExports.jsx("button", { type: "submit", disabled: !response.trim(), className: "px-4 py-2 text-sm bg-current text-white rounded-md hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed transition-opacity", children: "Submit" })] }) })), isExpanded && (jsxRuntimeExports.jsx("div", { className: "mt-3 pt-3 border-t border-current/20", children: jsxRuntimeExports.jsx("p", { className: "text-xs opacity-75", children: "This clarification helps us better understand your needs and provide more accurate assistance." }) }))] })] }) }));
+};
+
+/**
+ * Basic Usage Example
+ *
+ * This example shows the simplest way to use ConversationalInput
+ * with default settings and basic functionality.
+ */
+const BasicUsage = () => {
+    const handleSubmit = async (text, files) => {
+        console.log('Basic submission:', { text, files });
+        // Simulate API call
+        await new Promise(resolve => setTimeout(resolve, 1000));
+        alert(`Received: "${text}" and ${files?.length || 0} files`);
+    };
+    return (jsxRuntimeExports.jsxs("div", { className: "max-w-2xl mx-auto p-6", children: [jsxRuntimeExports.jsx("h2", { className: "text-2xl font-bold mb-4", children: "Basic Usage" }), jsxRuntimeExports.jsx("p", { className: "text-gray-600 mb-6", children: "Simple conversational input with voice, file upload, and submit functionality." }), jsxRuntimeExports.jsx(ConversationalInput, { onSubmit: handleSubmit, placeholder: "Tell me about your experience..." }), jsxRuntimeExports.jsxs("div", { className: "mt-4 text-sm text-gray-500", children: [jsxRuntimeExports.jsx("p", { children: "\u2705 Voice input enabled" }), jsxRuntimeExports.jsx("p", { children: "\u2705 File upload enabled" }), jsxRuntimeExports.jsx("p", { children: "\u2705 Submit button enabled" }), jsxRuntimeExports.jsx("p", { children: "\u2705 Clear text button enabled" })] })] }));
+};
+
+/**
+ * Form Integration Example
+ *
+ * This example shows how to integrate ConversationalInput
+ * into a larger form without using its submit functionality.
+ */
+const FormIntegration = () => {
+    const [formData, setFormData] = React.useState({
+        name: '',
+        email: '',
+        description: '',
+        files: []
+    });
+    const handleFormSubmit = (e) => {
+        e.preventDefault();
+        console.log('Form submitted:', formData);
+        alert(`Form submitted with: ${formData.description} and ${formData.files.length} files`);
+    };
+    const handleTextChange = (text) => {
+        setFormData(prev => ({ ...prev, description: text }));
+    };
+    const handleFilesChange = (files) => {
+        setFormData(prev => ({ ...prev, files }));
+    };
+    return (jsxRuntimeExports.jsxs("div", { className: "max-w-2xl mx-auto p-6", children: [jsxRuntimeExports.jsx("h2", { className: "text-2xl font-bold mb-4", children: "Form Integration" }), jsxRuntimeExports.jsx("p", { className: "text-gray-600 mb-6", children: "ConversationalInput embedded in a larger form, letting the form handle submission." }), jsxRuntimeExports.jsxs("form", { onSubmit: handleFormSubmit, className: "space-y-4", children: [jsxRuntimeExports.jsxs("div", { children: [jsxRuntimeExports.jsx("label", { className: "block text-sm font-medium text-gray-700 mb-2", children: "Name" }), jsxRuntimeExports.jsx("input", { type: "text", value: formData.name, onChange: (e) => setFormData(prev => ({ ...prev, name: e.target.value })), className: "w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500", required: true })] }), jsxRuntimeExports.jsxs("div", { children: [jsxRuntimeExports.jsx("label", { className: "block text-sm font-medium text-gray-700 mb-2", children: "Email" }), jsxRuntimeExports.jsx("input", { type: "email", value: formData.email, onChange: (e) => setFormData(prev => ({ ...prev, email: e.target.value })), className: "w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500", required: true })] }), jsxRuntimeExports.jsxs("div", { children: [jsxRuntimeExports.jsx("label", { className: "block text-sm font-medium text-gray-700 mb-2", children: "Description (Conversational Input)" }), jsxRuntimeExports.jsx(ConversationalInput, { onSubmit: () => { }, showSubmitButton: false, submitTrigger: "none" // Disable auto-submit
+                                , onTextChange: handleTextChange, onFilesChange: handleFilesChange, placeholder: "Describe your needs naturally...", className: "border border-gray-300 rounded-md" })] }), jsxRuntimeExports.jsx("button", { type: "submit", className: "w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 transition-colors", children: "Submit Form" })] }), jsxRuntimeExports.jsxs("div", { className: "mt-4 text-sm text-gray-500", children: [jsxRuntimeExports.jsx("p", { children: "\u2705 Embedded in larger form" }), jsxRuntimeExports.jsx("p", { children: "\u2705 No submit button (form handles submission)" }), jsxRuntimeExports.jsx("p", { children: "\u2705 Controlled text and files" }), jsxRuntimeExports.jsx("p", { children: "\u2705 Form validation works" })] })] }));
+};
+
+/**
+ * Custom Styling Example
+ *
+ * This example shows how to customize the appearance
+ * using the classNames prop and custom CSS.
+ */
+const CustomStyling = () => {
+    const handleSubmit = async (text, files) => {
+        console.log('Custom styled submission:', { text, files });
+        alert(`Received: "${text}" and ${files?.length || 0} files`);
+    };
+    return (jsxRuntimeExports.jsxs("div", { className: "max-w-2xl mx-auto p-6", children: [jsxRuntimeExports.jsx("h2", { className: "text-2xl font-bold mb-4", children: "Custom Styling" }), jsxRuntimeExports.jsx("p", { className: "text-gray-600 mb-6", children: "Customize the appearance using classNames and custom CSS classes." }), jsxRuntimeExports.jsx(ConversationalInput, { onSubmit: handleSubmit, placeholder: "Try our custom styled input...", classNames: {
+                    container: "max-w-full",
+                    textarea: "h-32 text-lg font-serif bg-gradient-to-r from-purple-50 to-blue-50 border-2 border-purple-200 focus:border-purple-500 focus:ring-purple-200",
+                    actionBar: "bg-gradient-to-r from-purple-100 to-blue-100 p-3 rounded-b-lg",
+                    voiceButton: "bg-purple-600 text-white border-0 hover:bg-purple-700 px-6 py-2 rounded-full",
+                    fileButton: "bg-blue-600 text-white border-0 hover:bg-blue-700 px-6 py-2 rounded-full",
+                    submitButton: "bg-gradient-to-r from-green-500 to-emerald-600 text-white border-0 hover:from-green-600 hover:to-emerald-700 px-8 py-2 rounded-full font-semibold",
+                    clearButton: "bg-red-500 text-white border-0 hover:bg-red-600 px-4 py-2 rounded-full",
+                    fileDisplay: "bg-white/80 backdrop-blur-sm border border-purple-200 rounded-lg p-2",
+                    errorDisplay: "bg-red-100 border border-red-300 text-red-800 rounded-lg p-3"
+                } }), jsxRuntimeExports.jsxs("div", { className: "mt-4 text-sm text-gray-500", children: [jsxRuntimeExports.jsx("p", { children: "\u2705 Custom container styling" }), jsxRuntimeExports.jsx("p", { children: "\u2705 Gradient backgrounds" }), jsxRuntimeExports.jsx("p", { children: "\u2705 Custom button colors" }), jsxRuntimeExports.jsx("p", { children: "\u2705 Enhanced textarea appearance" }), jsxRuntimeExports.jsx("p", { children: "\u2705 Custom file display styling" })] })] }));
+};
+
+/**
+ * Render Props Example
+ *
+ * This example shows how to use render props for complete
+ * customization of button appearance and behavior.
+ */
+const RenderProps = () => {
+    const handleSubmit = async (text, files) => {
+        console.log('Render props submission:', { text, files });
+        alert(`Received: "${text}" and ${files?.length || 0} files`);
+    };
+    return (jsxRuntimeExports.jsxs("div", { className: "max-w-2xl mx-auto p-6", children: [jsxRuntimeExports.jsx("h2", { className: "text-2xl font-bold mb-4", children: "Render Props" }), jsxRuntimeExports.jsx("p", { className: "text-gray-600 mb-6", children: "Complete customization using render props for maximum flexibility." }), jsxRuntimeExports.jsx(ConversationalInput, { onSubmit: handleSubmit, placeholder: "Try our completely custom rendered interface...", render: {
+                    voiceButton: ({ isListening, onClick, disabled, className }) => (jsxRuntimeExports.jsx("button", { onClick: onClick, disabled: disabled, className: `${className} ${isListening ? 'animate-pulse bg-red-500' : 'bg-blue-500'} text-white px-6 py-2 rounded-full font-bold transition-all duration-300`, children: isListening ? '🔴 Recording...' : '🎤 Start Voice' })),
+                    fileButton: ({ onClick, disabled, className, acceptedTypes }) => (jsxRuntimeExports.jsxs("button", { onClick: onClick, disabled: disabled, className: `${className} bg-green-500 text-white px-6 py-2 rounded-full font-bold hover:bg-green-600 transition-colors`, children: ["\uD83D\uDCCE Add Files (", acceptedTypes.join(', '), ")"] })),
+                    submitButton: ({ onClick, disabled, isSubmitting, text, className }) => (jsxRuntimeExports.jsx("button", { onClick: onClick, disabled: disabled, className: `${className} bg-gradient-to-r from-purple-600 to-pink-600 text-white px-8 py-3 rounded-full font-bold text-lg hover:from-purple-700 hover:to-pink-700 transition-all duration-300 transform hover:scale-105`, children: isSubmitting ? '⏳ Processing...' : `🚀 ${text}` })),
+                    clearButton: ({ onClick, disabled, className }) => (jsxRuntimeExports.jsx("button", { onClick: onClick, disabled: disabled, className: `${className} bg-gray-500 text-white px-4 py-2 rounded-full hover:bg-gray-600 transition-colors`, children: "\uD83D\uDDD1\uFE0F Clear" })),
+                    fileDisplay: ({ files, onRemove, disabled, className }) => (jsxRuntimeExports.jsx("div", { className: `${className} space-y-2`, children: files.map((file, index) => (jsxRuntimeExports.jsxs("div", { className: "flex items-center justify-between bg-white/90 backdrop-blur-sm border border-green-200 rounded-lg p-3", children: [jsxRuntimeExports.jsxs("div", { className: "flex items-center space-x-3", children: [jsxRuntimeExports.jsx("span", { className: "text-green-600", children: "\uD83D\uDCC4" }), jsxRuntimeExports.jsx("span", { className: "font-medium", children: file.name }), jsxRuntimeExports.jsxs("span", { className: "text-sm text-gray-500", children: ["(", (file.size / 1024 / 1024).toFixed(2), " MB)"] })] }), jsxRuntimeExports.jsx("button", { onClick: () => onRemove(index), disabled: disabled, className: "text-red-500 hover:text-red-700 transition-colors", children: "\u274C" })] }, index))) })),
+                    errorDisplay: ({ error, className }) => (jsxRuntimeExports.jsxs("div", { className: `${className} bg-red-100 border border-red-300 text-red-800 rounded-lg p-3 flex items-center space-x-2`, children: [jsxRuntimeExports.jsx("span", { className: "text-red-600", children: "\u26A0\uFE0F" }), jsxRuntimeExports.jsx("span", { children: error })] }))
+                } }), jsxRuntimeExports.jsxs("div", { className: "mt-4 text-sm text-gray-500", children: [jsxRuntimeExports.jsx("p", { children: "\u2705 Custom voice button with recording state" }), jsxRuntimeExports.jsx("p", { children: "\u2705 Custom file button with accepted types" }), jsxRuntimeExports.jsx("p", { children: "\u2705 Custom submit button with loading state" }), jsxRuntimeExports.jsx("p", { children: "\u2705 Custom clear button styling" }), jsxRuntimeExports.jsx("p", { children: "\u2705 Enhanced file display with file info" }), jsxRuntimeExports.jsx("p", { children: "\u2705 Custom error display with icon" })] })] }));
+};
+
+/**
+ * OpenAI Integration Example
+ *
+ * This example shows how to integrate ConversationalInput
+ * with OpenAI's GPT models for intelligent data extraction and processing.
+ */
+const OpenAI = () => {
+    const [isProcessing, setIsProcessing] = React.useState(false);
+    const [clarification, setClarification] = React.useState(null);
+    const [extractedData, setExtractedData] = React.useState(null);
+    const processWithOpenAI = async (text, files) => {
+        try {
+            setIsProcessing(true);
+            // Simulate OpenAI API call
+            const response = await fetch('/api/openai/process', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    text,
+                    files: files?.map(f => ({ name: f.name, size: f.size, type: f.type })),
+                    model: 'gpt-4',
+                    temperature: 0.1
+                })
+            });
+            if (!response.ok)
+                throw new Error('API call failed');
+            const result = await response.json();
+            if (result.needsClarification) {
+                setClarification(result.clarificationQuestion);
+            }
+            else {
+                setExtractedData(result.extractedData);
+                setClarification(null);
+            }
+        }
+        catch (error) {
+            console.error('OpenAI processing error:', error);
+            alert('Error processing with OpenAI');
+        }
+        finally {
+            setIsProcessing(false);
+        }
+    };
+    const handleClarify = async (response) => {
+        try {
+            setIsProcessing(true);
+            // Send clarification response
+            const result = await fetch('/api/openai/clarify', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ response, context: extractedData })
+            });
+            if (!result.ok)
+                throw new Error('Clarification failed');
+            const clarifiedResult = await result.json();
+            setExtractedData(clarifiedResult.extractedData);
+            setClarification(null);
+        }
+        catch (error) {
+            console.error('Clarification error:', error);
+            alert('Error processing clarification');
+        }
+        finally {
+            setIsProcessing(false);
+        }
+    };
+    return (jsxRuntimeExports.jsxs("div", { className: "max-w-4xl mx-auto p-6", children: [jsxRuntimeExports.jsx("h2", { className: "text-2xl font-bold mb-4", children: "OpenAI Integration" }), jsxRuntimeExports.jsx("p", { className: "text-gray-600 mb-6", children: "Process conversational input with OpenAI GPT models for intelligent data extraction." }), jsxRuntimeExports.jsxs("div", { className: "grid grid-cols-1 lg:grid-cols-2 gap-6", children: [jsxRuntimeExports.jsxs("div", { children: [jsxRuntimeExports.jsx(ConversationalInput, { onSubmit: processWithOpenAI, isSubmitting: isProcessing, placeholder: "Describe your job experience, skills, and availability...", requireFiles: true, acceptedFileTypes: ['.pdf', '.doc', '.docx'], labels: {
+                                    addAttachments: "Upload Resume",
+                                    submit: "Process with AI"
+                                } }), clarification && (jsxRuntimeExports.jsx("div", { className: "mt-4", children: jsxRuntimeExports.jsx(Clarifier, { question: clarification, onClarify: handleClarify, type: "info", suggestions: ["Yes", "No", "Maybe", "I'll provide more details"], showInput: true, inputPlaceholder: "Please clarify...", dismissible: true, onDismiss: () => setClarification(null) }) }))] }), jsxRuntimeExports.jsxs("div", { className: "bg-gray-50 p-4 rounded-lg", children: [jsxRuntimeExports.jsx("h3", { className: "text-lg font-semibold mb-3", children: "Extracted Data" }), extractedData ? (jsxRuntimeExports.jsx("pre", { className: "bg-white p-3 rounded border text-sm overflow-auto", children: JSON.stringify(extractedData, null, 2) })) : (jsxRuntimeExports.jsx("p", { className: "text-gray-500", children: "Submit text and files to see AI-extracted data here..." }))] })] }), jsxRuntimeExports.jsxs("div", { className: "mt-6 text-sm text-gray-600", children: [jsxRuntimeExports.jsx("h4", { className: "font-semibold mb-2", children: "Features:" }), jsxRuntimeExports.jsxs("ul", { className: "space-y-1", children: [jsxRuntimeExports.jsx("li", { children: "\u2705 OpenAI GPT-4 integration" }), jsxRuntimeExports.jsx("li", { children: "\u2705 Intelligent data extraction" }), jsxRuntimeExports.jsx("li", { children: "\u2705 Clarification system" }), jsxRuntimeExports.jsx("li", { children: "\u2705 File processing" }), jsxRuntimeExports.jsx("li", { children: "\u2705 Structured output" })] })] })] }));
+};
+
+/**
+ * Local LLM Integration Example
+ *
+ * This example shows how to integrate ConversationalInput
+ * with local LLMs like Ollama or LM Studio for privacy-focused, offline processing.
+ */
+const LocalLLM = () => {
+    const [isProcessing, setIsProcessing] = React.useState(false);
+    const [modelStatus, setModelStatus] = React.useState('disconnected');
+    const [extractedData, setExtractedData] = React.useState(null);
+    const [modelInfo, setModelInfo] = React.useState(null);
+    const checkModelConnection = async () => {
+        try {
+            setModelStatus('disconnected');
+            // Check if local model is running
+            const response = await fetch('http://localhost:11434/api/tags', {
+                method: 'GET',
+                signal: AbortSignal.timeout(5000) // 5 second timeout
+            });
+            if (response.ok) {
+                const models = await response.json();
+                setModelInfo(models);
+                setModelStatus('connected');
+                return true;
+            }
+            else {
+                throw new Error('Model not responding');
+            }
+        }
+        catch (error) {
+            console.error('Model connection error:', error);
+            setModelStatus('error');
+            return false;
+        }
+    };
+    const processWithLocalLLM = async (text, files) => {
+        try {
+            setIsProcessing(true);
+            // Check model connection first
+            const isConnected = await checkModelConnection();
+            if (!isConnected) {
+                alert('Local LLM not available. Please ensure Ollama or LM Studio is running.');
+                return;
+            }
+            // Process with local model
+            const response = await fetch('http://localhost:11434/api/generate', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    model: 'mixtral', // or 'llama2', 'mistral', etc.
+                    prompt: `Extract structured information from this text and return as JSON:
+          
+Text: ${text}
+
+Files: ${files?.map(f => f.name).join(', ') || 'None'}
+
+Please extract and return a JSON object with the following structure:
+{
+  "experience": "years of experience",
+  "skills": ["skill1", "skill2"],
+  "availability": "availability details",
+  "location": "preferred location",
+  "salary": "salary expectations"
+}`,
+                    stream: false,
+                    options: {
+                        temperature: 0.1,
+                        top_p: 0.9,
+                        max_tokens: 1000
+                    }
+                })
+            });
+            if (!response.ok)
+                throw new Error('Local LLM processing failed');
+            const result = await response.json();
+            try {
+                // Try to parse the response as JSON
+                const extracted = JSON.parse(result.response);
+                setExtractedData(extracted);
+            }
+            catch (parseError) {
+                // If parsing fails, show the raw response
+                setExtractedData({
+                    rawResponse: result.response,
+                    note: 'Response could not be parsed as JSON'
+                });
+            }
+        }
+        catch (error) {
+            console.error('Local LLM processing error:', error);
+            alert('Error processing with local LLM');
+        }
+        finally {
+            setIsProcessing(false);
+        }
+    };
+    return (jsxRuntimeExports.jsxs("div", { className: "max-w-4xl mx-auto p-6", children: [jsxRuntimeExports.jsx("h2", { className: "text-2xl font-bold mb-4", children: "Local LLM Integration" }), jsxRuntimeExports.jsx("p", { className: "text-gray-600 mb-6", children: "Process conversational input with local LLMs like Ollama or LM Studio for privacy and offline processing." }), jsxRuntimeExports.jsxs("div", { className: "mb-6 p-4 bg-gray-50 rounded-lg", children: [jsxRuntimeExports.jsx("h3", { className: "text-lg font-semibold mb-3", children: "Model Status" }), jsxRuntimeExports.jsxs("div", { className: "flex items-center space-x-4", children: [jsxRuntimeExports.jsxs("div", { className: "flex items-center space-x-2", children: [jsxRuntimeExports.jsx("div", { className: `w-3 h-3 rounded-full ${modelStatus === 'connected' ? 'bg-green-500' :
+                                            modelStatus === 'error' ? 'bg-red-500' : 'bg-gray-400'}` }), jsxRuntimeExports.jsx("span", { className: "capitalize", children: modelStatus })] }), modelStatus === 'connected' && modelInfo && (jsxRuntimeExports.jsxs("div", { className: "text-sm text-gray-600", children: ["Available models: ", modelInfo.models?.map((m) => m.name).join(', ') || 'Unknown'] })), jsxRuntimeExports.jsx("button", { onClick: checkModelConnection, className: "px-3 py-1 bg-blue-500 text-white text-sm rounded hover:bg-blue-600 transition-colors", children: "Check Connection" })] })] }), jsxRuntimeExports.jsxs("div", { className: "grid grid-cols-1 lg:grid-cols-2 gap-6", children: [jsxRuntimeExports.jsx("div", { children: jsxRuntimeExports.jsx(ConversationalInput, { onSubmit: processWithLocalLLM, isSubmitting: isProcessing, placeholder: "Describe your experience and requirements...", requireFiles: false, labels: {
+                                submit: "Process with Local LLM"
+                            } }) }), jsxRuntimeExports.jsxs("div", { className: "bg-gray-50 p-4 rounded-lg", children: [jsxRuntimeExports.jsx("h3", { className: "text-lg font-semibold mb-3", children: "Extracted Data" }), extractedData ? (jsxRuntimeExports.jsx("pre", { className: "bg-white p-3 rounded border text-sm overflow-auto", children: JSON.stringify(extractedData, null, 2) })) : (jsxRuntimeExports.jsx("p", { className: "text-gray-500", children: "Submit text to see local LLM extracted data here..." }))] })] }), jsxRuntimeExports.jsxs("div", { className: "mt-6 text-sm text-gray-600", children: [jsxRuntimeExports.jsx("h4", { className: "font-semibold mb-2", children: "Features:" }), jsxRuntimeExports.jsxs("ul", { className: "space-y-1", children: [jsxRuntimeExports.jsx("li", { children: "\u2705 Local LLM integration (Ollama, LM Studio)" }), jsxRuntimeExports.jsx("li", { children: "\u2705 Privacy-focused processing" }), jsxRuntimeExports.jsx("li", { children: "\u2705 Offline capability" }), jsxRuntimeExports.jsx("li", { children: "\u2705 Model status monitoring" }), jsxRuntimeExports.jsx("li", { children: "\u2705 Structured data extraction" })] }), jsxRuntimeExports.jsx("h4", { className: "font-semibold mt-3 mb-2", children: "Setup Instructions:" }), jsxRuntimeExports.jsxs("ol", { className: "list-decimal list-inside space-y-1 ml-4", children: [jsxRuntimeExports.jsxs("li", { children: ["Install Ollama: ", jsxRuntimeExports.jsx("code", { className: "bg-gray-200 px-1 rounded", children: "curl -fsSL https://ollama.ai/install.sh | sh" })] }), jsxRuntimeExports.jsxs("li", { children: ["Pull a model: ", jsxRuntimeExports.jsx("code", { className: "bg-gray-200 px-1 rounded", children: "ollama pull mixtral" })] }), jsxRuntimeExports.jsxs("li", { children: ["Start Ollama: ", jsxRuntimeExports.jsx("code", { className: "bg-gray-200 px-1 rounded", children: "ollama serve" })] })] })] })] }));
+};
+
+exports.BasicUsage = BasicUsage;
+exports.BasicUsageExample = BasicUsage;
+exports.Clarifier = Clarifier;
 exports.ConversationalInput = ConversationalInput;
+exports.CustomStyling = CustomStyling;
+exports.CustomStylingExample = CustomStyling;
+exports.FormIntegration = FormIntegration;
+exports.FormIntegrationExample = FormIntegration;
+exports.LocalLLM = LocalLLM;
+exports.LocalLLMExample = LocalLLM;
+exports.OpenAI = OpenAI;
+exports.OpenAIExample = OpenAI;
+exports.RenderProps = RenderProps;
+exports.RenderPropsExample = RenderProps;
 exports.default = ConversationalInput;
 exports.useFileUpload = useFileUpload;
 exports.useVoiceRecognition = useVoiceRecognition;

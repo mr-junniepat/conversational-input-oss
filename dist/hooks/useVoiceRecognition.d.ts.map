@@ -1,0 +1,1 @@
+{"version":3,"file":"useVoiceRecognition.d.ts","sourceRoot":"","sources":["../../src/hooks/useVoiceRecognition.ts"],"names":[],"mappings":"AACA,OAAO,EAAE,oBAAoB,EAAE,MAAM,UAAU,CAAC;AAGhD,OAAO,CAAC,MAAM,CAAC;IACb,UAAU,MAAM;QACd,iBAAiB,EAAE,GAAG,CAAC;QACvB,uBAAuB,EAAE,GAAG,CAAC;KAC9B;CACF;AAED,wBAAgB,mBAAmB,IAAI,oBAAoB,CA2F1D"}

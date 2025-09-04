@@ -367,13 +367,13 @@ function requireReactJsxRuntime_development () {
 	            return null;
 	          };
 	    React$1 = {
-	      "react-stack-bottom-frame": function (callStackForError) {
+	      react_stack_bottom_frame: function (callStackForError) {
 	        return callStackForError();
 	      }
 	    };
 	    var specialPropKeyWarningShown;
 	    var didWarnAboutElementRef = {};
-	    var unknownOwnerDebugStack = React$1["react-stack-bottom-frame"].bind(
+	    var unknownOwnerDebugStack = React$1.react_stack_bottom_frame.bind(
 	      React$1,
 	      UnknownOwner
 	    )();
@@ -806,6 +806,7 @@ class AIServiceManager {
                 max_tokens: provider.maxTokens || 1000,
                 temperature: provider.temperature || 0.1,
                 stream: false
+                // Note: Local models don't support response_format, so we omit it
             })
         });
         if (!response.ok) {

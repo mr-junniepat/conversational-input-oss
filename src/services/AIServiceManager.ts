@@ -293,6 +293,7 @@ export class AIServiceManager {
         max_tokens: provider.maxTokens || 1000,
         temperature: provider.temperature || 0.1,
         stream: false
+        // Note: Local models don't support response_format, so we omit it
       })
     });
 

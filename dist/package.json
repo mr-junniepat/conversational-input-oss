@@ -1,9 +1,8 @@
 {
-  "name": "@junniepat/conversational-ai-input",
-  "version": "2.1.0",
+  "name": "@promptforms/conversational-input",
+  "version": "1.0.0",
   "description": "A flexible React component for conversational AI input with voice-to-text, file upload, and AI processing capabilities",
   "main": "dist/index.js",
-  "module": "dist/index.esm.js",
   "types": "dist/index.d.ts",
   "files": [
     "dist",

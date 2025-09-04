@@ -3,6 +3,33 @@ import React$1 from 'react';
 interface ConversationalInputProps {
     /** Callback function called when form is submitted */
     onSubmit: (text: string, files?: File[]) => Promise<void> | void;
+    /** AI Processing Configuration */
+    aiProcessing?: {
+        /** AI Provider to use (openai, anthropic, lmstudio, ollama, gemini) */
+        provider: string;
+        /** API Key for the provider */
+        apiKey?: string;
+        /** Custom endpoint for local providers */
+        endpoint?: string;
+        /** Model to use */
+        model?: string;
+        /** Maximum tokens for response */
+        maxTokens?: number;
+        /** Temperature for response generation */
+        temperature?: number;
+        /** Whether to extract structured data */
+        extractStructuredData?: boolean;
+        /** Schema for structured data extraction */
+        schema?: Record<string, any>;
+        /** Whether to enable clarification mode */
+        clarificationMode?: boolean;
+        /** Language for responses */
+        language?: string;
+        /** Callback when AI processing is complete */
+        onAIResponse?: (response: any) => void;
+        /** Callback when AI processing fails */
+        onAIError?: (error: string) => void;
+    };
     /** Placeholder text for the input area */
     placeholder?: string;
     /** Whether file upload is required before submission */
@@ -147,7 +174,7 @@ interface AIProcessingResult {
     confidence?: number;
     suggestions?: string[];
 }
-interface AIProvider {
+interface AIProvider$1 {
     name: string;
     apiKey?: string;
     endpoint?: string;
@@ -224,6 +251,22 @@ interface ClarifierProps {
 }
 declare const Clarifier: React$1.FC<ClarifierProps>;
 
+interface AIProviderConfigProps {
+    onConfigure: (config: {
+        provider: string;
+        apiKey?: string;
+        endpoint?: string;
+        model?: string;
+    }) => void;
+    currentConfig?: {
+        provider: string;
+        apiKey?: string;
+        endpoint?: string;
+        model?: string;
+    };
+}
+declare const AIProviderConfig: React$1.FC<AIProviderConfigProps>;
+
 declare global {
     interface Window {
         SpeechRecognition: any;
@@ -233,6 +276,84 @@ declare global {
 declare function useVoiceRecognition(): VoiceRecognitionHook;
 
 declare function useFileUpload(acceptedTypes?: string[], maxSize?: number): FileUploadHook;
+
+interface AIProvider {
+    name: string;
+    apiKey?: string;
+    endpoint?: string;
+    model?: string;
+    maxTokens?: number;
+    temperature?: number;
+}
+interface AIResponse {
+    success: boolean;
+    data?: any;
+    error?: string;
+    usage?: {
+        promptTokens: number;
+        completionTokens: number;
+        totalTokens: number;
+    };
+}
+interface ProcessingOptions {
+    extractStructuredData?: boolean;
+    schema?: Record<string, any>;
+    clarificationMode?: boolean;
+    language?: string;
+}
+declare class AIServiceManager {
+    private providers;
+    constructor();
+    private initializeDefaultProviders;
+    /**
+     * Configure a provider with API key or endpoint
+     */
+    configureProvider(providerId: string, config: Partial<AIProvider>): void;
+    /**
+     * Get available providers
+     */
+    getAvailableProviders(): string[];
+    /**
+     * Check if a provider is properly configured
+     */
+    isProviderConfigured(providerId: string): boolean;
+    /**
+     * Process text with the specified AI provider
+     */
+    processText(providerId: string, text: string, files?: File[], options?: ProcessingOptions): Promise<AIResponse>;
+    private processWithOpenAI;
+    private processWithAnthropic;
+    private processWithLMStudio;
+    private processWithOllama;
+    private processWithGemini;
+    private buildPrompt;
+    private getSystemPrompt;
+    private parseAIResponse;
+}
+declare const aiServiceManager: AIServiceManager;
+
+interface UseAIProcessingOptions {
+    provider: string;
+    apiKey?: string;
+    endpoint?: string;
+    model?: string;
+    maxTokens?: number;
+    temperature?: number;
+    extractStructuredData?: boolean;
+    schema?: Record<string, any>;
+    clarificationMode?: boolean;
+    language?: string;
+}
+interface UseAIProcessingReturn {
+    processText: (text: string, files?: File[]) => Promise<AIResponse>;
+    isProcessing: boolean;
+    lastResponse: AIResponse | null;
+    error: string | null;
+    configureProvider: (config: Partial<AIProvider>) => void;
+    isConfigured: boolean;
+    availableProviders: string[];
+}
+declare function useAIProcessing(options: UseAIProcessingOptions): UseAIProcessingReturn;
 
 /**
  * Basic Usage Example
@@ -266,6 +387,8 @@ declare const CustomStyling: React$1.FC;
  */
 declare const RenderProps: React$1.FC;
 
+declare const AIIntegrationExample: React$1.FC;
+
 /**
  * OpenAI Integration Example
  *
@@ -282,4 +405,4 @@ declare const OpenAI: React$1.FC;
  */
 declare const LocalLLM: React$1.FC;
 
-export { AIProcessingResult, AIProcessor, AIProvider, BasicUsage, BasicUsage as BasicUsageExample, Clarifier, ClarifierProps$1 as ClarifierProps, ClearButtonRenderProps, ConversationalInput, ConversationalInputProps, ConversationalInputState, CustomStyling, CustomStyling as CustomStylingExample, ErrorDisplayRenderProps, FileButtonRenderProps, FileDisplayRenderProps, FileUploadHook, FormIntegration, FormIntegration as FormIntegrationExample, FormIntegrationProps, LocalLLM, LocalLLM as LocalLLMExample, OpenAI, OpenAI as OpenAIExample, RenderProps, RenderProps as RenderPropsExample, SubmitButtonRenderProps, VoiceButtonRenderProps, VoiceRecognitionHook, ConversationalInput as default, useFileUpload, useVoiceRecognition };
+export { AIIntegrationExample, AIProcessingResult, AIProcessor, AIProvider$1 as AIProvider, AIProviderConfig, AIResponse, AIServiceManager, AIProvider as AIServiceProvider, BasicUsage, BasicUsage as BasicUsageExample, Clarifier, ClarifierProps$1 as ClarifierProps, ClearButtonRenderProps, ConversationalInput, ConversationalInputProps, ConversationalInputState, CustomStyling, CustomStyling as CustomStylingExample, ErrorDisplayRenderProps, FileButtonRenderProps, FileDisplayRenderProps, FileUploadHook, FormIntegration, FormIntegration as FormIntegrationExample, FormIntegrationProps, LocalLLM, LocalLLM as LocalLLMExample, OpenAI, OpenAI as OpenAIExample, ProcessingOptions, RenderProps, RenderProps as RenderPropsExample, SubmitButtonRenderProps, VoiceButtonRenderProps, VoiceRecognitionHook, aiServiceManager, ConversationalInput as default, useAIProcessing, useFileUpload, useVoiceRecognition };

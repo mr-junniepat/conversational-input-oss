@@ -3,9 +3,11 @@ import { Mic, Upload, Loader2, XCircle, FileText } from 'lucide-react';
 import { ConversationalInputProps } from '../types';
 import { useVoiceRecognition } from '../hooks/useVoiceRecognition';
 import { useFileUpload } from '../hooks/useFileUpload';
+import { useAIProcessing } from '../hooks/useAIProcessing';
 
 export const ConversationalInput: React.FC<ConversationalInputProps> = ({
   onSubmit,
+  aiProcessing,
   placeholder = "Start typing or speaking naturally...",
   requireFiles = false,
   acceptedFileTypes = ['.pdf', '.doc', '.docx', '.txt'],
@@ -32,6 +34,20 @@ export const ConversationalInput: React.FC<ConversationalInputProps> = ({
   const [text, setText] = useState(initialValue);
   const [error, setError] = useState<string | null>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+
+  // AI Processing hook
+  const aiProcessingHook = useAIProcessing({
+    provider: aiProcessing?.provider || 'openai',
+    apiKey: aiProcessing?.apiKey,
+    endpoint: aiProcessing?.endpoint,
+    model: aiProcessing?.model,
+    maxTokens: aiProcessing?.maxTokens,
+    temperature: aiProcessing?.temperature,
+    extractStructuredData: aiProcessing?.extractStructuredData,
+    schema: aiProcessing?.schema,
+    clarificationMode: aiProcessing?.clarificationMode,
+    language: aiProcessing?.language
+  });
 
   // Use controlled value if provided
   const displayText = controlledValue !== undefined ? controlledValue : text;
@@ -122,6 +138,25 @@ export const ConversationalInput: React.FC<ConversationalInputProps> = ({
     setError(null);
     
     try {
+      // If AI processing is configured, process the text first
+      if (aiProcessing && aiProcessingHook.isConfigured) {
+        const aiResponse = await aiProcessingHook.processText(fullText, files);
+        
+        if (aiResponse.success) {
+          // Call the AI response callback if provided
+          if (aiProcessing.onAIResponse) {
+            aiProcessing.onAIResponse(aiResponse.data);
+          }
+        } else {
+          // Call the AI error callback if provided
+          if (aiProcessing.onAIError) {
+            aiProcessing.onAIError(aiResponse.error || 'AI processing failed');
+          }
+          setError(aiResponse.error || 'AI processing failed');
+          return;
+        }
+      }
+      
       await onSubmit(fullText, files);
       // Clear form after successful submission if enabled
       if (clearAfterSubmit) {
@@ -134,7 +169,7 @@ export const ConversationalInput: React.FC<ConversationalInputProps> = ({
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Submission failed');
     }
-  }, [fullText, files, requireFiles, validateInput, onSubmit, clearAfterSubmit, controlledValue, clearFiles, resetTranscript]);
+  }, [fullText, files, requireFiles, validateInput, onSubmit, clearAfterSubmit, controlledValue, clearFiles, resetTranscript, aiProcessing, aiProcessingHook]);
 
   const clearText = useCallback(() => {
     if (controlledValue === undefined) {
@@ -343,7 +378,7 @@ export const ConversationalInput: React.FC<ConversationalInputProps> = ({
   };
 
   return (
-    <div className={`w-full max-w-3xl mx-auto ${className} ${classNames.container || ''}`}>
+    <div className={`w-full max-w-3xl mx-auto ${className || ''} ${classNames.container || ''}`}>
       {/* Main Input Card */}
       <div className="bg-white rounded-2xl shadow-lg border border-gray-200 overflow-hidden">
         {/* Text Input Area */}

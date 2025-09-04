@@ -1,8 +1,8 @@
-# 🎯 **@promptforms/conversational-input**
+# conversational-ai-input
 
 > **The most flexible conversational input component for React applications**
 
-[![npm version](https://badge.fury.io/js/%40promptforms%2Fconversational-input.svg)](https://badge.fury.io/js/%40promptforms%2Fconversational-input)
+[![npm version](https://badge.fury.io/js/conversational-ai-input.svg)](https://badge.fury.io/js/conversational-ai-input)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![TypeScript](https://img.shields.io/badge/TypeScript-007ACC?logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
 [![React](https://img.shields.io/badge/React-20232A?logo=react&logoColor=61DAFB)](https://reactjs.org/)
@@ -25,11 +25,11 @@ A powerful, flexible React component that transforms any form input into a conve
 ### **Installation**
 
 ```bash
-npm install @promptforms/conversational-input
+npm install conversational-ai-input
 # or
-yarn add @promptforms/conversational-input
+yarn add conversational-ai-input
 # or
-pnpm add @promptforms/conversational-input
+pnpm add conversational-ai-input
 ```
 
 ### **Basic Usage**

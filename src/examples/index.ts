@@ -3,6 +3,7 @@ export { BasicUsage } from './BasicUsage';
 export { FormIntegration } from './FormIntegration';
 export { CustomStyling } from './CustomStyling';
 export { RenderProps } from './RenderProps';
+export { AIIntegrationExample } from './AIIntegration';
 
 // Default exports
 export { default as BasicUsageExample } from './BasicUsage';

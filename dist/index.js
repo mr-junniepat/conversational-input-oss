@@ -367,13 +367,13 @@ function requireReactJsxRuntime_development () {
 	            return null;
 	          };
 	    React$1 = {
-	      react_stack_bottom_frame: function (callStackForError) {
+	      "react-stack-bottom-frame": function (callStackForError) {
 	        return callStackForError();
 	      }
 	    };
 	    var specialPropKeyWarningShown;
 	    var didWarnAboutElementRef = {};
-	    var unknownOwnerDebugStack = React$1.react_stack_bottom_frame.bind(
+	    var unknownOwnerDebugStack = React$1["react-stack-bottom-frame"].bind(
 	      React$1,
 	      UnknownOwner
 	    )();
@@ -580,11 +580,452 @@ function useFileUpload(acceptedTypes = ['*'], maxSize = 10 * 1024 * 1024 // 10MB
     };
 }
 
-const ConversationalInput = ({ onSubmit, placeholder = "Start typing or speaking naturally...", requireFiles = false, acceptedFileTypes = ['.pdf', '.doc', '.docx', '.txt'], maxFileSize = 10 * 1024 * 1024, // 10MB
+class AIServiceManager {
+    constructor() {
+        this.providers = new Map();
+        // Initialize with default providers
+        this.initializeDefaultProviders();
+    }
+    initializeDefaultProviders() {
+        // OpenAI
+        this.providers.set('openai', {
+            name: 'OpenAI',
+            model: 'gpt-3.5-turbo',
+            maxTokens: 1000,
+            temperature: 0.1
+        });
+        // Anthropic
+        this.providers.set('anthropic', {
+            name: 'Anthropic',
+            model: 'claude-3-haiku-20240307',
+            maxTokens: 1000,
+            temperature: 0.1
+        });
+        // LM Studio
+        this.providers.set('lmstudio', {
+            name: 'LM Studio',
+            endpoint: 'http://localhost:1234/v1/chat/completions',
+            model: 'local-model',
+            maxTokens: 1000,
+            temperature: 0.1
+        });
+        // Ollama
+        this.providers.set('ollama', {
+            name: 'Ollama',
+            endpoint: 'http://localhost:11434/api/generate',
+            model: 'mixtral',
+            maxTokens: 1000,
+            temperature: 0.1
+        });
+        // Google Gemini
+        this.providers.set('gemini', {
+            name: 'Google Gemini',
+            model: 'gemini-pro',
+            maxTokens: 1000,
+            temperature: 0.1
+        });
+    }
+    /**
+     * Configure a provider with API key or endpoint
+     */
+    configureProvider(providerId, config) {
+        const existing = this.providers.get(providerId);
+        if (existing) {
+            this.providers.set(providerId, { ...existing, ...config });
+        }
+        else {
+            this.providers.set(providerId, {
+                name: providerId,
+                ...config
+            });
+        }
+    }
+    /**
+     * Get available providers
+     */
+    getAvailableProviders() {
+        return Array.from(this.providers.keys());
+    }
+    /**
+     * Check if a provider is properly configured
+     */
+    isProviderConfigured(providerId) {
+        const provider = this.providers.get(providerId);
+        if (!provider)
+            return false;
+        // Check if provider has required configuration
+        switch (providerId) {
+            case 'openai':
+            case 'anthropic':
+            case 'gemini':
+                return !!provider.apiKey;
+            case 'lmstudio':
+            case 'ollama':
+                return !!provider.endpoint;
+            default:
+                return false;
+        }
+    }
+    /**
+     * Process text with the specified AI provider
+     */
+    async processText(providerId, text, files, options = {}) {
+        const provider = this.providers.get(providerId);
+        if (!provider) {
+            return {
+                success: false,
+                error: `Provider '${providerId}' not found`
+            };
+        }
+        if (!this.isProviderConfigured(providerId)) {
+            return {
+                success: false,
+                error: `Provider '${providerId}' is not properly configured. Please provide API key or endpoint.`
+            };
+        }
+        try {
+            switch (providerId) {
+                case 'openai':
+                    return await this.processWithOpenAI(provider, text, files, options);
+                case 'anthropic':
+                    return await this.processWithAnthropic(provider, text, files, options);
+                case 'lmstudio':
+                    return await this.processWithLMStudio(provider, text, files, options);
+                case 'ollama':
+                    return await this.processWithOllama(provider, text, files, options);
+                case 'gemini':
+                    return await this.processWithGemini(provider, text, files, options);
+                default:
+                    return {
+                        success: false,
+                        error: `Provider '${providerId}' is not supported`
+                    };
+            }
+        }
+        catch (error) {
+            return {
+                success: false,
+                error: error instanceof Error ? error.message : 'Unknown error occurred'
+            };
+        }
+    }
+    async processWithOpenAI(provider, text, files, options = {}) {
+        const prompt = this.buildPrompt(text, files, options);
+        const response = await fetch('https://api.openai.com/v1/chat/completions', {
+            method: 'POST',
+            headers: {
+                'Authorization': `Bearer ${provider.apiKey}`,
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                model: provider.model || 'gpt-3.5-turbo',
+                messages: [
+                    {
+                        role: 'system',
+                        content: this.getSystemPrompt(options)
+                    },
+                    {
+                        role: 'user',
+                        content: prompt
+                    }
+                ],
+                max_tokens: provider.maxTokens || 1000,
+                temperature: provider.temperature || 0.1,
+                response_format: options.extractStructuredData ? { type: 'json_object' } : undefined
+            })
+        });
+        if (!response.ok) {
+            throw new Error(`OpenAI API error: ${response.status} ${response.statusText}`);
+        }
+        const data = await response.json();
+        return {
+            success: true,
+            data: this.parseAIResponse(data, options),
+            usage: {
+                promptTokens: data.usage?.prompt_tokens || 0,
+                completionTokens: data.usage?.completion_tokens || 0,
+                totalTokens: data.usage?.total_tokens || 0
+            }
+        };
+    }
+    async processWithAnthropic(provider, text, files, options = {}) {
+        const prompt = this.buildPrompt(text, files, options);
+        const response = await fetch('https://api.anthropic.com/v1/messages', {
+            method: 'POST',
+            headers: {
+                'x-api-key': provider.apiKey,
+                'Content-Type': 'application/json',
+                'anthropic-version': '2023-06-01'
+            },
+            body: JSON.stringify({
+                model: provider.model || 'claude-3-haiku-20240307',
+                max_tokens: provider.maxTokens || 1000,
+                temperature: provider.temperature || 0.1,
+                system: this.getSystemPrompt(options),
+                messages: [
+                    {
+                        role: 'user',
+                        content: prompt
+                    }
+                ]
+            })
+        });
+        if (!response.ok) {
+            throw new Error(`Anthropic API error: ${response.status} ${response.statusText}`);
+        }
+        const data = await response.json();
+        return {
+            success: true,
+            data: this.parseAIResponse(data, options),
+            usage: {
+                promptTokens: data.usage?.input_tokens || 0,
+                completionTokens: data.usage?.output_tokens || 0,
+                totalTokens: (data.usage?.input_tokens || 0) + (data.usage?.output_tokens || 0)
+            }
+        };
+    }
+    async processWithLMStudio(provider, text, files, options = {}) {
+        const prompt = this.buildPrompt(text, files, options);
+        const response = await fetch(provider.endpoint, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                model: provider.model || 'local-model',
+                messages: [
+                    {
+                        role: 'system',
+                        content: this.getSystemPrompt(options)
+                    },
+                    {
+                        role: 'user',
+                        content: prompt
+                    }
+                ],
+                max_tokens: provider.maxTokens || 1000,
+                temperature: provider.temperature || 0.1,
+                stream: false
+            })
+        });
+        if (!response.ok) {
+            throw new Error(`LM Studio API error: ${response.status} ${response.statusText}`);
+        }
+        const data = await response.json();
+        return {
+            success: true,
+            data: this.parseAIResponse(data, options),
+            usage: {
+                promptTokens: 0, // LM Studio doesn't provide usage stats
+                completionTokens: 0,
+                totalTokens: 0
+            }
+        };
+    }
+    async processWithOllama(provider, text, files, options = {}) {
+        const prompt = this.buildPrompt(text, files, options);
+        const response = await fetch(provider.endpoint, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                model: provider.model || 'mixtral',
+                prompt: `${this.getSystemPrompt(options)}\n\nUser: ${prompt}`,
+                stream: false,
+                options: {
+                    temperature: provider.temperature || 0.1,
+                    num_predict: provider.maxTokens || 1000
+                }
+            })
+        });
+        if (!response.ok) {
+            throw new Error(`Ollama API error: ${response.status} ${response.statusText}`);
+        }
+        const data = await response.json();
+        return {
+            success: true,
+            data: this.parseAIResponse(data, options),
+            usage: {
+                promptTokens: 0, // Ollama doesn't provide usage stats
+                completionTokens: 0,
+                totalTokens: 0
+            }
+        };
+    }
+    async processWithGemini(provider, text, files, options = {}) {
+        const prompt = this.buildPrompt(text, files, options);
+        const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${provider.model || 'gemini-pro'}:generateContent?key=${provider.apiKey}`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                contents: [
+                    {
+                        parts: [
+                            {
+                                text: `${this.getSystemPrompt(options)}\n\nUser: ${prompt}`
+                            }
+                        ]
+                    }
+                ],
+                generationConfig: {
+                    temperature: provider.temperature || 0.1,
+                    maxOutputTokens: provider.maxTokens || 1000
+                }
+            })
+        });
+        if (!response.ok) {
+            throw new Error(`Gemini API error: ${response.status} ${response.statusText}`);
+        }
+        const data = await response.json();
+        return {
+            success: true,
+            data: this.parseAIResponse(data, options),
+            usage: {
+                promptTokens: 0, // Gemini doesn't provide detailed usage stats
+                completionTokens: 0,
+                totalTokens: 0
+            }
+        };
+    }
+    buildPrompt(text, files, options = {}) {
+        let prompt = `User Input: ${text}`;
+        if (files && files.length > 0) {
+            prompt += `\n\nAttached Files: ${files.map(f => f.name).join(', ')}`;
+            // Note: In a real implementation, you'd process the file contents here
+        }
+        if (options.extractStructuredData && options.schema) {
+            prompt += `\n\nPlease extract the following information and return it as JSON:`;
+            Object.entries(options.schema).forEach(([key, value]) => {
+                prompt += `\n- ${key}: ${value}`;
+            });
+        }
+        return prompt;
+    }
+    getSystemPrompt(options = {}) {
+        let systemPrompt = "You are a helpful AI assistant that processes user input and extracts relevant information.";
+        if (options.extractStructuredData) {
+            systemPrompt += " Extract the requested information and return it as structured JSON data.";
+        }
+        if (options.clarificationMode) {
+            systemPrompt += " If information is missing or unclear, ask clarifying questions to help the user provide better input.";
+        }
+        if (options.language) {
+            systemPrompt += ` Respond in ${options.language}.`;
+        }
+        return systemPrompt;
+    }
+    parseAIResponse(data, options = {}) {
+        if (options.extractStructuredData) {
+            try {
+                // Try to parse JSON response
+                const content = data.choices?.[0]?.message?.content ||
+                    data.content?.[0]?.parts?.[0]?.text ||
+                    data.response;
+                if (content) {
+                    return JSON.parse(content);
+                }
+            }
+            catch (error) {
+                // If JSON parsing fails, return the raw content
+                return data.choices?.[0]?.message?.content ||
+                    data.content?.[0]?.parts?.[0]?.text ||
+                    data.response ||
+                    data;
+            }
+        }
+        return data.choices?.[0]?.message?.content ||
+            data.content?.[0]?.parts?.[0]?.text ||
+            data.response ||
+            data;
+    }
+}
+// Export a singleton instance
+const aiServiceManager = new AIServiceManager();
+
+function useAIProcessing(options) {
+    const [isProcessing, setIsProcessing] = React.useState(false);
+    const [lastResponse, setLastResponse] = React.useState(null);
+    const [error, setError] = React.useState(null);
+    // Configure the provider when options change
+    const configureProvider = React.useCallback((config) => {
+        aiServiceManager.configureProvider(options.provider, {
+            ...config,
+            apiKey: options.apiKey,
+            endpoint: options.endpoint,
+            model: options.model,
+            maxTokens: options.maxTokens,
+            temperature: options.temperature
+        });
+    }, [options.provider, options.apiKey, options.endpoint, options.model, options.maxTokens, options.temperature]);
+    // Check if provider is configured
+    const isConfigured = aiServiceManager.isProviderConfigured(options.provider);
+    // Get available providers
+    const availableProviders = aiServiceManager.getAvailableProviders();
+    // Process text with AI
+    const processText = React.useCallback(async (text, files) => {
+        setIsProcessing(true);
+        setError(null);
+        try {
+            // Configure provider if not already configured
+            if (!isConfigured) {
+                configureProvider({});
+            }
+            const processingOptions = {
+                extractStructuredData: options.extractStructuredData,
+                schema: options.schema,
+                clarificationMode: options.clarificationMode,
+                language: options.language
+            };
+            const response = await aiServiceManager.processText(options.provider, text, files, processingOptions);
+            setLastResponse(response);
+            return response;
+        }
+        catch (err) {
+            const errorMessage = err instanceof Error ? err.message : 'Unknown error occurred';
+            setError(errorMessage);
+            const errorResponse = {
+                success: false,
+                error: errorMessage
+            };
+            setLastResponse(errorResponse);
+            return errorResponse;
+        }
+        finally {
+            setIsProcessing(false);
+        }
+    }, [options, isConfigured, configureProvider]);
+    return {
+        processText,
+        isProcessing,
+        lastResponse,
+        error,
+        configureProvider,
+        isConfigured,
+        availableProviders
+    };
+}
+
+const ConversationalInput = ({ onSubmit, aiProcessing, placeholder = "Start typing or speaking naturally...", requireFiles = false, acceptedFileTypes = ['.pdf', '.doc', '.docx', '.txt'], maxFileSize = 10 * 1024 * 1024, // 10MB
 className = "", showClearButton = true, labels = {}, enableVoice = true, enableFileUpload = true, showSubmitButton = true, validateInput, isSubmitting = false, disabled = false, initialValue = "", value: controlledValue, onTextChange, onFilesChange, autoSubmitOnEnter = false, submitTrigger = 'both', clearAfterSubmit = true, classNames = {}, render, }) => {
     const [text, setText] = React.useState(initialValue);
     const [error, setError] = React.useState(null);
     const textareaRef = React.useRef(null);
+    // AI Processing hook
+    const aiProcessingHook = useAIProcessing({
+        provider: aiProcessing?.provider || 'openai',
+        apiKey: aiProcessing?.apiKey,
+        endpoint: aiProcessing?.endpoint,
+        model: aiProcessing?.model,
+        maxTokens: aiProcessing?.maxTokens,
+        temperature: aiProcessing?.temperature,
+        extractStructuredData: aiProcessing?.extractStructuredData,
+        schema: aiProcessing?.schema,
+        clarificationMode: aiProcessing?.clarificationMode,
+        language: aiProcessing?.language
+    });
     // Use controlled value if provided
     const displayText = controlledValue !== undefined ? controlledValue : text;
     const { isListening, isSupported: voiceSupported, startListening, stopListening, transcript, resetTranscript, } = useVoiceRecognition();
@@ -648,6 +1089,24 @@ className = "", showClearButton = true, labels = {}, enableVoice = true, enableF
         }
         setError(null);
         try {
+            // If AI processing is configured, process the text first
+            if (aiProcessing && aiProcessingHook.isConfigured) {
+                const aiResponse = await aiProcessingHook.processText(fullText, files);
+                if (aiResponse.success) {
+                    // Call the AI response callback if provided
+                    if (aiProcessing.onAIResponse) {
+                        aiProcessing.onAIResponse(aiResponse.data);
+                    }
+                }
+                else {
+                    // Call the AI error callback if provided
+                    if (aiProcessing.onAIError) {
+                        aiProcessing.onAIError(aiResponse.error || 'AI processing failed');
+                    }
+                    setError(aiResponse.error || 'AI processing failed');
+                    return;
+                }
+            }
             await onSubmit(fullText, files);
             // Clear form after successful submission if enabled
             if (clearAfterSubmit) {
@@ -661,7 +1120,7 @@ className = "", showClearButton = true, labels = {}, enableVoice = true, enableF
         catch (err) {
             setError(err instanceof Error ? err.message : 'Submission failed');
         }
-    }, [fullText, files, requireFiles, validateInput, onSubmit, clearAfterSubmit, controlledValue, clearFiles, resetTranscript]);
+    }, [fullText, files, requireFiles, validateInput, onSubmit, clearAfterSubmit, controlledValue, clearFiles, resetTranscript, aiProcessing, aiProcessingHook]);
     const clearText = React.useCallback(() => {
         if (controlledValue === undefined) {
             setText('');
@@ -774,7 +1233,7 @@ className = "", showClearButton = true, labels = {}, enableVoice = true, enableF
         }
         return (jsxRuntimeExports.jsx("div", { className: "mt-4 p-3 bg-red-100 border border-red-300 rounded-lg text-red-700 text-sm", children: error }));
     };
-    return (jsxRuntimeExports.jsxs("div", { className: `w-full max-w-3xl mx-auto ${className} ${classNames.container || ''}`, children: [jsxRuntimeExports.jsxs("div", { className: "bg-white rounded-2xl shadow-lg border border-gray-200 overflow-hidden", children: [jsxRuntimeExports.jsxs("div", { className: "relative", children: [jsxRuntimeExports.jsx("textarea", { ref: textareaRef, className: `w-full h-[40vh] p-6 text-xl resize-none text-gray-900 placeholder-gray-500 border-none focus:outline-none ${isListening ? 'bg-green-50' : 'bg-white'} ${disabled ? 'opacity-50 cursor-not-allowed' : ''} ${classNames.textarea || ''}`, placeholder: placeholder, value: fullText, onChange: e => handleTextChange(e.target.value), onKeyDown: handleKeyDown, disabled: disabled || isSubmitting }), isListening && (jsxRuntimeExports.jsxs("div", { className: "absolute top-4 right-4 flex items-center gap-2 bg-green-100 text-green-700 px-3 py-1 rounded-full text-sm font-medium", children: [jsxRuntimeExports.jsx("div", { className: "w-2 h-2 bg-green-500 rounded-full animate-pulse" }), finalLabels.listening] }))] }), (enableVoice || enableFileUpload || showSubmitButton || (showClearButton && fullText)) && (jsxRuntimeExports.jsxs(jsxRuntimeExports.Fragment, { children: [jsxRuntimeExports.jsx("div", { className: "border-t border-gray-200" }), jsxRuntimeExports.jsxs("div", { className: `p-4 flex items-center justify-between ${classNames.actionBar || ''}`, children: [jsxRuntimeExports.jsxs("div", { className: "flex items-center gap-3", children: [renderFileButton(), renderVoiceButton()] }), jsxRuntimeExports.jsxs("div", { className: "flex items-center gap-3", children: [renderClearButton(), renderSubmitButton()] })] })] }))] }), renderErrorDisplay(), renderFileDisplay(), enableVoice && !voiceSupported && (jsxRuntimeExports.jsx("div", { className: "mt-4 p-3 bg-yellow-100 border border-yellow-300 rounded-lg text-yellow-700 text-sm", children: "Voice input is not supported in this browser. Please use text input instead." }))] }));
+    return (jsxRuntimeExports.jsxs("div", { className: `w-full max-w-3xl mx-auto ${className || ''} ${classNames.container || ''}`, children: [jsxRuntimeExports.jsxs("div", { className: "bg-white rounded-2xl shadow-lg border border-gray-200 overflow-hidden", children: [jsxRuntimeExports.jsxs("div", { className: "relative", children: [jsxRuntimeExports.jsx("textarea", { ref: textareaRef, className: `w-full h-[40vh] p-6 text-xl resize-none text-gray-900 placeholder-gray-500 border-none focus:outline-none ${isListening ? 'bg-green-50' : 'bg-white'} ${disabled ? 'opacity-50 cursor-not-allowed' : ''} ${classNames.textarea || ''}`, placeholder: placeholder, value: fullText, onChange: e => handleTextChange(e.target.value), onKeyDown: handleKeyDown, disabled: disabled || isSubmitting }), isListening && (jsxRuntimeExports.jsxs("div", { className: "absolute top-4 right-4 flex items-center gap-2 bg-green-100 text-green-700 px-3 py-1 rounded-full text-sm font-medium", children: [jsxRuntimeExports.jsx("div", { className: "w-2 h-2 bg-green-500 rounded-full animate-pulse" }), finalLabels.listening] }))] }), (enableVoice || enableFileUpload || showSubmitButton || (showClearButton && fullText)) && (jsxRuntimeExports.jsxs(jsxRuntimeExports.Fragment, { children: [jsxRuntimeExports.jsx("div", { className: "border-t border-gray-200" }), jsxRuntimeExports.jsxs("div", { className: `p-4 flex items-center justify-between ${classNames.actionBar || ''}`, children: [jsxRuntimeExports.jsxs("div", { className: "flex items-center gap-3", children: [renderFileButton(), renderVoiceButton()] }), jsxRuntimeExports.jsxs("div", { className: "flex items-center gap-3", children: [renderClearButton(), renderSubmitButton()] })] })] }))] }), renderErrorDisplay(), renderFileDisplay(), enableVoice && !voiceSupported && (jsxRuntimeExports.jsx("div", { className: "mt-4 p-3 bg-yellow-100 border border-yellow-300 rounded-lg text-yellow-700 text-sm", children: "Voice input is not supported in this browser. Please use text input instead." }))] }));
 };
 
 const Clarifier = ({ question, type = 'info', show = true, onClarify, suggestions = [], showInput = true, inputPlaceholder = "Please provide more details...", className = "", dismissible = false, onDismiss, }) => {
@@ -819,6 +1278,95 @@ const Clarifier = ({ question, type = 'info', show = true, onClarify, suggestion
         }
     };
     return (jsxRuntimeExports.jsx("div", { className: `rounded-lg border p-4 ${getTypeStyles()} ${className}`, children: jsxRuntimeExports.jsxs("div", { className: "flex items-start gap-3", children: [getIcon(), jsxRuntimeExports.jsxs("div", { className: "flex-1 min-w-0", children: [jsxRuntimeExports.jsxs("div", { className: "flex items-start justify-between gap-2", children: [jsxRuntimeExports.jsx("p", { className: "text-sm font-medium leading-relaxed", children: question }), dismissible && onDismiss && (jsxRuntimeExports.jsx("button", { onClick: onDismiss, className: "flex-shrink-0 p-1 hover:bg-white/20 rounded transition-colors", "aria-label": "Dismiss", children: jsxRuntimeExports.jsx("svg", { className: "w-4 h-4", fill: "none", stroke: "currentColor", viewBox: "0 0 24 24", children: jsxRuntimeExports.jsx("path", { strokeLinecap: "round", strokeLinejoin: "round", strokeWidth: 2, d: "M6 18L18 6M6 6l12 12" }) }) }))] }), suggestions.length > 0 && (jsxRuntimeExports.jsxs("div", { className: "mt-3", children: [jsxRuntimeExports.jsx("p", { className: "text-xs font-medium mb-2 opacity-75", children: "Suggested responses:" }), jsxRuntimeExports.jsx("div", { className: "flex flex-wrap gap-2", children: suggestions.map((suggestion, index) => (jsxRuntimeExports.jsx("button", { onClick: () => handleSuggestionClick(suggestion), className: "px-3 py-1 text-xs bg-white/50 hover:bg-white/70 rounded-full border border-current/20 transition-colors", children: suggestion }, index))) })] })), showInput && (jsxRuntimeExports.jsx("form", { onSubmit: handleSubmit, className: "mt-3", children: jsxRuntimeExports.jsxs("div", { className: "flex gap-2", children: [jsxRuntimeExports.jsx("input", { type: "text", value: response, onChange: (e) => setResponse(e.target.value), placeholder: inputPlaceholder, className: "flex-1 px-3 py-2 text-sm bg-white/70 border border-current/20 rounded-md focus:outline-none focus:ring-2 focus:ring-current/40 focus:border-transparent" }), jsxRuntimeExports.jsx("button", { type: "submit", disabled: !response.trim(), className: "px-4 py-2 text-sm bg-current text-white rounded-md hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed transition-opacity", children: "Submit" })] }) })), isExpanded && (jsxRuntimeExports.jsx("div", { className: "mt-3 pt-3 border-t border-current/20", children: jsxRuntimeExports.jsx("p", { className: "text-xs opacity-75", children: "This clarification helps us better understand your needs and provide more accurate assistance." }) }))] })] }) }));
+};
+
+const AIProviderConfig = ({ onConfigure, currentConfig }) => {
+    const [provider, setProvider] = React.useState(currentConfig?.provider || 'openai');
+    const [apiKey, setApiKey] = React.useState(currentConfig?.apiKey || '');
+    const [endpoint, setEndpoint] = React.useState(currentConfig?.endpoint || '');
+    const [model, setModel] = React.useState(currentConfig?.model || '');
+    const [isConfigured, setIsConfigured] = React.useState(false);
+    const handleSave = () => {
+        const config = {
+            provider,
+            apiKey: provider === 'openai' || provider === 'anthropic' || provider === 'gemini' ? apiKey : undefined,
+            endpoint: provider === 'lmstudio' || provider === 'ollama' ? endpoint : undefined,
+            model: model || undefined
+        };
+        onConfigure(config);
+        setIsConfigured(true);
+        // Reset after 2 seconds
+        setTimeout(() => setIsConfigured(false), 2000);
+    };
+    const getProviderInfo = (providerId) => {
+        switch (providerId) {
+            case 'openai':
+                return {
+                    name: 'OpenAI',
+                    description: 'GPT models for general purpose AI',
+                    icon: '🤖',
+                    needsApiKey: true,
+                    defaultModel: 'gpt-3.5-turbo',
+                    defaultEndpoint: ''
+                };
+            case 'anthropic':
+                return {
+                    name: 'Anthropic Claude',
+                    description: 'Claude models for advanced reasoning',
+                    icon: '🧠',
+                    needsApiKey: true,
+                    defaultModel: 'claude-3-haiku-20240307',
+                    defaultEndpoint: ''
+                };
+            case 'lmstudio':
+                return {
+                    name: 'LM Studio',
+                    description: 'Local AI models for privacy',
+                    icon: '🏠',
+                    needsApiKey: false,
+                    defaultModel: 'local-model',
+                    defaultEndpoint: 'http://localhost:1234/v1/chat/completions'
+                };
+            case 'ollama':
+                return {
+                    name: 'Ollama',
+                    description: 'Local AI models with easy setup',
+                    icon: '🦙',
+                    needsApiKey: false,
+                    defaultModel: 'mixtral',
+                    defaultEndpoint: 'http://localhost:11434/api/generate'
+                };
+            case 'gemini':
+                return {
+                    name: 'Google Gemini',
+                    description: 'Google\'s advanced AI models',
+                    icon: '💎',
+                    needsApiKey: true,
+                    defaultModel: 'gemini-pro',
+                    defaultEndpoint: ''
+                };
+            default:
+                return {
+                    name: 'Unknown',
+                    description: 'Unknown provider',
+                    icon: '❓',
+                    needsApiKey: false,
+                    defaultModel: '',
+                    defaultEndpoint: ''
+                };
+        }
+    };
+    const providerInfo = getProviderInfo(provider);
+    return (jsxRuntimeExports.jsxs("div", { className: "bg-white rounded-2xl shadow-lg p-6 border border-gray-200", children: [jsxRuntimeExports.jsxs("div", { className: "flex items-center space-x-3 mb-6", children: [jsxRuntimeExports.jsx("div", { className: "w-10 h-10 bg-blue-100 rounded-xl flex items-center justify-center", children: jsxRuntimeExports.jsx(lucideReact.Settings, { className: "w-5 h-5 text-blue-600" }) }), jsxRuntimeExports.jsxs("div", { children: [jsxRuntimeExports.jsx("h3", { className: "text-xl font-semibold text-gray-900", children: "AI Provider Configuration" }), jsxRuntimeExports.jsx("p", { className: "text-gray-600", children: "Configure your AI provider for automatic processing" })] })] }), jsxRuntimeExports.jsxs("div", { className: "mb-6", children: [jsxRuntimeExports.jsx("label", { className: "block text-sm font-medium text-gray-700 mb-3", children: "Choose AI Provider" }), jsxRuntimeExports.jsx("div", { className: "grid grid-cols-2 md:grid-cols-3 gap-3", children: ['openai', 'anthropic', 'lmstudio', 'ollama', 'gemini'].map((providerId) => {
+                            const info = getProviderInfo(providerId);
+                            return (jsxRuntimeExports.jsxs("button", { onClick: () => {
+                                    setProvider(providerId);
+                                    setModel(info.defaultModel);
+                                    setEndpoint(info.defaultEndpoint);
+                                }, className: `p-3 rounded-lg border-2 transition-all ${provider === providerId
+                                    ? 'border-blue-500 bg-blue-50'
+                                    : 'border-gray-200 hover:border-gray-300'}`, children: [jsxRuntimeExports.jsx("div", { className: "text-2xl mb-1", children: info.icon }), jsxRuntimeExports.jsx("div", { className: "text-sm font-medium text-gray-900", children: info.name }), jsxRuntimeExports.jsx("div", { className: "text-xs text-gray-500", children: info.description })] }, providerId));
+                        }) })] }), jsxRuntimeExports.jsxs("div", { className: "space-y-4", children: [providerInfo.needsApiKey && (jsxRuntimeExports.jsxs("div", { children: [jsxRuntimeExports.jsxs("label", { className: "block text-sm font-medium text-gray-700 mb-2", children: [jsxRuntimeExports.jsx(lucideReact.Key, { className: "w-4 h-4 inline mr-1" }), "API Key"] }), jsxRuntimeExports.jsx("input", { type: "password", value: apiKey, onChange: (e) => setApiKey(e.target.value), placeholder: `Enter your ${providerInfo.name} API key`, className: "w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" }), jsxRuntimeExports.jsx("p", { className: "text-xs text-gray-500 mt-1", children: "Your API key is stored locally and never sent to our servers" })] })), !providerInfo.needsApiKey && (jsxRuntimeExports.jsxs("div", { children: [jsxRuntimeExports.jsxs("label", { className: "block text-sm font-medium text-gray-700 mb-2", children: [jsxRuntimeExports.jsx(lucideReact.Server, { className: "w-4 h-4 inline mr-1" }), "Endpoint URL"] }), jsxRuntimeExports.jsx("input", { type: "url", value: endpoint, onChange: (e) => setEndpoint(e.target.value), placeholder: providerInfo.defaultEndpoint, className: "w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" }), jsxRuntimeExports.jsx("p", { className: "text-xs text-gray-500 mt-1", children: "Make sure your local AI service is running" })] })), jsxRuntimeExports.jsxs("div", { children: [jsxRuntimeExports.jsx("label", { className: "block text-sm font-medium text-gray-700 mb-2", children: "Model Name" }), jsxRuntimeExports.jsx("input", { type: "text", value: model, onChange: (e) => setModel(e.target.value), placeholder: providerInfo.defaultModel, className: "w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" })] })] }), jsxRuntimeExports.jsx("div", { className: "mt-6", children: jsxRuntimeExports.jsx("button", { onClick: handleSave, disabled: !apiKey && !endpoint, className: "w-full bg-blue-600 text-white py-3 px-4 rounded-lg font-semibold hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors flex items-center justify-center space-x-2", children: isConfigured ? (jsxRuntimeExports.jsxs(jsxRuntimeExports.Fragment, { children: [jsxRuntimeExports.jsx(lucideReact.CheckCircle, { className: "w-5 h-5" }), jsxRuntimeExports.jsx("span", { children: "Configured!" })] })) : (jsxRuntimeExports.jsxs(jsxRuntimeExports.Fragment, { children: [jsxRuntimeExports.jsx(lucideReact.Settings, { className: "w-5 h-5" }), jsxRuntimeExports.jsx("span", { children: "Save Configuration" })] })) }) }), isConfigured && (jsxRuntimeExports.jsxs("div", { className: "mt-4 p-3 bg-green-50 border border-green-200 rounded-lg flex items-center space-x-2", children: [jsxRuntimeExports.jsx(lucideReact.CheckCircle, { className: "w-5 h-5 text-green-600" }), jsxRuntimeExports.jsx("span", { className: "text-green-800 text-sm", children: "AI provider configured successfully! You can now use AI processing." })] })), jsxRuntimeExports.jsx("div", { className: "mt-4 p-3 bg-blue-50 border border-blue-200 rounded-lg", children: jsxRuntimeExports.jsxs("div", { className: "flex items-start space-x-2", children: [jsxRuntimeExports.jsx(lucideReact.AlertCircle, { className: "w-5 h-5 text-blue-600 mt-0.5" }), jsxRuntimeExports.jsxs("div", { className: "text-blue-800 text-sm", children: [jsxRuntimeExports.jsx("p", { className: "font-medium mb-1", children: "Need help getting started?" }), jsxRuntimeExports.jsxs("ul", { className: "text-xs space-y-1", children: [jsxRuntimeExports.jsxs("li", { children: ["\u2022 ", jsxRuntimeExports.jsx("strong", { children: "OpenAI:" }), " Get your API key from platform.openai.com"] }), jsxRuntimeExports.jsxs("li", { children: ["\u2022 ", jsxRuntimeExports.jsx("strong", { children: "Anthropic:" }), " Get your API key from console.anthropic.com"] }), jsxRuntimeExports.jsxs("li", { children: ["\u2022 ", jsxRuntimeExports.jsx("strong", { children: "LM Studio:" }), " Download and run LM Studio locally"] }), jsxRuntimeExports.jsxs("li", { children: ["\u2022 ", jsxRuntimeExports.jsx("strong", { children: "Ollama:" }), " Install Ollama and run: ollama run mixtral"] }), jsxRuntimeExports.jsxs("li", { children: ["\u2022 ", jsxRuntimeExports.jsx("strong", { children: "Gemini:" }), " Get your API key from makersuite.google.com"] })] })] })] }) })] }));
 };
 
 /**
@@ -908,6 +1456,71 @@ const RenderProps = () => {
                     fileDisplay: ({ files, onRemove, disabled, className }) => (jsxRuntimeExports.jsx("div", { className: `${className} space-y-2`, children: files.map((file, index) => (jsxRuntimeExports.jsxs("div", { className: "flex items-center justify-between bg-white/90 backdrop-blur-sm border border-green-200 rounded-lg p-3", children: [jsxRuntimeExports.jsxs("div", { className: "flex items-center space-x-3", children: [jsxRuntimeExports.jsx("span", { className: "text-green-600", children: "\uD83D\uDCC4" }), jsxRuntimeExports.jsx("span", { className: "font-medium", children: file.name }), jsxRuntimeExports.jsxs("span", { className: "text-sm text-gray-500", children: ["(", (file.size / 1024 / 1024).toFixed(2), " MB)"] })] }), jsxRuntimeExports.jsx("button", { onClick: () => onRemove(index), disabled: disabled, className: "text-red-500 hover:text-red-700 transition-colors", children: "\u274C" })] }, index))) })),
                     errorDisplay: ({ error, className }) => (jsxRuntimeExports.jsxs("div", { className: `${className} bg-red-100 border border-red-300 text-red-800 rounded-lg p-3 flex items-center space-x-2`, children: [jsxRuntimeExports.jsx("span", { className: "text-red-600", children: "\u26A0\uFE0F" }), jsxRuntimeExports.jsx("span", { children: error })] }))
                 } }), jsxRuntimeExports.jsxs("div", { className: "mt-4 text-sm text-gray-500", children: [jsxRuntimeExports.jsx("p", { children: "\u2705 Custom voice button with recording state" }), jsxRuntimeExports.jsx("p", { children: "\u2705 Custom file button with accepted types" }), jsxRuntimeExports.jsx("p", { children: "\u2705 Custom submit button with loading state" }), jsxRuntimeExports.jsx("p", { children: "\u2705 Custom clear button styling" }), jsxRuntimeExports.jsx("p", { children: "\u2705 Enhanced file display with file info" }), jsxRuntimeExports.jsx("p", { children: "\u2705 Custom error display with icon" })] })] }));
+};
+
+const AIIntegrationExample = () => {
+    const [aiResponse, setAIResponse] = React.useState(null);
+    const [aiError, setAIError] = React.useState(null);
+    const handleSubmit = async (text, files) => {
+        console.log('Form submitted:', { text, files });
+        // Your custom submission logic here
+    };
+    const handleAIResponse = (response) => {
+        setAIResponse(response);
+        setAIError(null);
+        console.log('AI Response:', response);
+    };
+    const handleAIError = (error) => {
+        setAIError(error);
+        setAIResponse(null);
+        console.error('AI Error:', error);
+    };
+    return (jsxRuntimeExports.jsxs("div", { className: "max-w-4xl mx-auto p-6 space-y-6", children: [jsxRuntimeExports.jsxs("div", { className: "text-center", children: [jsxRuntimeExports.jsx("h2", { className: "text-3xl font-bold text-gray-900 mb-4", children: "AI Integration Examples" }), jsxRuntimeExports.jsx("p", { className: "text-gray-600", children: "See how easy it is to integrate AI processing with just an API key!" })] }), jsxRuntimeExports.jsxs("div", { className: "bg-white rounded-2xl shadow-lg p-6 border border-gray-200", children: [jsxRuntimeExports.jsx("h3", { className: "text-xl font-semibold text-gray-900 mb-4", children: "\uD83E\uDD16 OpenAI Integration" }), jsxRuntimeExports.jsx("p", { className: "text-gray-600 mb-4", children: "Just provide your OpenAI API key and the component handles everything!" }), jsxRuntimeExports.jsx(ConversationalInput, { onSubmit: handleSubmit, placeholder: "Tell me about your experience and I'll extract structured data...", aiProcessing: {
+                            provider: 'openai',
+                            apiKey: process.env.REACT_APP_OPENAI_API_KEY || 'your-openai-api-key',
+                            model: 'gpt-3.5-turbo',
+                            extractStructuredData: true,
+                            schema: {
+                                name: 'string',
+                                experience: 'string',
+                                skills: 'array',
+                                location: 'string',
+                                email: 'string'
+                            },
+                            onAIResponse: handleAIResponse,
+                            onAIError: handleAIError
+                        }, labels: {
+                            submit: 'Process with AI'
+                        } }), aiResponse && (jsxRuntimeExports.jsxs("div", { className: "mt-4 p-4 bg-green-50 border border-green-200 rounded-lg", children: [jsxRuntimeExports.jsx("h4", { className: "font-semibold text-green-900 mb-2", children: "AI Extracted Data:" }), jsxRuntimeExports.jsx("pre", { className: "text-sm text-green-800 overflow-auto", children: JSON.stringify(aiResponse, null, 2) })] })), aiError && (jsxRuntimeExports.jsxs("div", { className: "mt-4 p-4 bg-red-50 border border-red-200 rounded-lg", children: [jsxRuntimeExports.jsx("h4", { className: "font-semibold text-red-900 mb-2", children: "AI Error:" }), jsxRuntimeExports.jsx("p", { className: "text-sm text-red-800", children: aiError })] }))] }), jsxRuntimeExports.jsxs("div", { className: "bg-white rounded-2xl shadow-lg p-6 border border-gray-200", children: [jsxRuntimeExports.jsx("h3", { className: "text-xl font-semibold text-gray-900 mb-4", children: "\uD83C\uDFE0 LM Studio Integration" }), jsxRuntimeExports.jsx("p", { className: "text-gray-600 mb-4", children: "Use your local LM Studio instance for privacy-focused AI processing." }), jsxRuntimeExports.jsx(ConversationalInput, { onSubmit: handleSubmit, placeholder: "Ask me anything and I'll respond using your local AI model...", aiProcessing: {
+                            provider: 'lmstudio',
+                            endpoint: 'http://localhost:1234/v1/chat/completions',
+                            model: 'local-model',
+                            clarificationMode: true,
+                            onAIResponse: handleAIResponse,
+                            onAIError: handleAIError
+                        }, labels: {
+                            submit: 'Ask Local AI'
+                        } })] }), jsxRuntimeExports.jsxs("div", { className: "bg-white rounded-2xl shadow-lg p-6 border border-gray-200", children: [jsxRuntimeExports.jsx("h3", { className: "text-xl font-semibold text-gray-900 mb-4", children: "\uD83E\uDD99 Ollama Integration" }), jsxRuntimeExports.jsx("p", { className: "text-gray-600 mb-4", children: "Connect to your local Ollama instance for powerful local AI processing." }), jsxRuntimeExports.jsx(ConversationalInput, { onSubmit: handleSubmit, placeholder: "Describe your project and I'll help you plan it...", aiProcessing: {
+                            provider: 'ollama',
+                            endpoint: 'http://localhost:11434/api/generate',
+                            model: 'mixtral',
+                            maxTokens: 2000,
+                            temperature: 0.7,
+                            onAIResponse: handleAIResponse,
+                            onAIError: handleAIError
+                        }, labels: {
+                            submit: 'Generate with Ollama'
+                        } })] }), jsxRuntimeExports.jsxs("div", { className: "bg-white rounded-2xl shadow-lg p-6 border border-gray-200", children: [jsxRuntimeExports.jsx("h3", { className: "text-xl font-semibold text-gray-900 mb-4", children: "\uD83E\uDDE0 Anthropic Claude Integration" }), jsxRuntimeExports.jsx("p", { className: "text-gray-600 mb-4", children: "Use Claude for advanced reasoning and analysis." }), jsxRuntimeExports.jsx(ConversationalInput, { onSubmit: handleSubmit, placeholder: "Describe a complex problem and I'll help you solve it...", aiProcessing: {
+                            provider: 'anthropic',
+                            apiKey: process.env.REACT_APP_ANTHROPIC_API_KEY || 'your-anthropic-api-key',
+                            model: 'claude-3-haiku-20240307',
+                            maxTokens: 1500,
+                            temperature: 0.3,
+                            onAIResponse: handleAIResponse,
+                            onAIError: handleAIError
+                        }, labels: {
+                            submit: 'Analyze with Claude'
+                        } })] })] }));
 };
 
 /**
@@ -1084,6 +1697,9 @@ Please extract and return a JSON object with the following structure:
                             } }) }), jsxRuntimeExports.jsxs("div", { className: "bg-gray-50 p-4 rounded-lg", children: [jsxRuntimeExports.jsx("h3", { className: "text-lg font-semibold mb-3", children: "Extracted Data" }), extractedData ? (jsxRuntimeExports.jsx("pre", { className: "bg-white p-3 rounded border text-sm overflow-auto", children: JSON.stringify(extractedData, null, 2) })) : (jsxRuntimeExports.jsx("p", { className: "text-gray-500", children: "Submit text to see local LLM extracted data here..." }))] })] }), jsxRuntimeExports.jsxs("div", { className: "mt-6 text-sm text-gray-600", children: [jsxRuntimeExports.jsx("h4", { className: "font-semibold mb-2", children: "Features:" }), jsxRuntimeExports.jsxs("ul", { className: "space-y-1", children: [jsxRuntimeExports.jsx("li", { children: "\u2705 Local LLM integration (Ollama, LM Studio)" }), jsxRuntimeExports.jsx("li", { children: "\u2705 Privacy-focused processing" }), jsxRuntimeExports.jsx("li", { children: "\u2705 Offline capability" }), jsxRuntimeExports.jsx("li", { children: "\u2705 Model status monitoring" }), jsxRuntimeExports.jsx("li", { children: "\u2705 Structured data extraction" })] }), jsxRuntimeExports.jsx("h4", { className: "font-semibold mt-3 mb-2", children: "Setup Instructions:" }), jsxRuntimeExports.jsxs("ol", { className: "list-decimal list-inside space-y-1 ml-4", children: [jsxRuntimeExports.jsxs("li", { children: ["Install Ollama: ", jsxRuntimeExports.jsx("code", { className: "bg-gray-200 px-1 rounded", children: "curl -fsSL https://ollama.ai/install.sh | sh" })] }), jsxRuntimeExports.jsxs("li", { children: ["Pull a model: ", jsxRuntimeExports.jsx("code", { className: "bg-gray-200 px-1 rounded", children: "ollama pull mixtral" })] }), jsxRuntimeExports.jsxs("li", { children: ["Start Ollama: ", jsxRuntimeExports.jsx("code", { className: "bg-gray-200 px-1 rounded", children: "ollama serve" })] })] })] })] }));
 };
 
+exports.AIIntegrationExample = AIIntegrationExample;
+exports.AIProviderConfig = AIProviderConfig;
+exports.AIServiceManager = AIServiceManager;
 exports.BasicUsage = BasicUsage;
 exports.BasicUsageExample = BasicUsage;
 exports.Clarifier = Clarifier;
@@ -1098,7 +1714,9 @@ exports.OpenAI = OpenAI;
 exports.OpenAIExample = OpenAI;
 exports.RenderProps = RenderProps;
 exports.RenderPropsExample = RenderProps;
+exports.aiServiceManager = aiServiceManager;
 exports.default = ConversationalInput;
+exports.useAIProcessing = useAIProcessing;
 exports.useFileUpload = useFileUpload;
 exports.useVoiceRecognition = useVoiceRecognition;
 //# sourceMappingURL=index.js.map

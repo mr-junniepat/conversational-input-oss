@@ -2,6 +2,34 @@ export interface ConversationalInputProps {
   /** Callback function called when form is submitted */
   onSubmit: (text: string, files?: File[]) => Promise<void> | void;
   
+  /** AI Processing Configuration */
+  aiProcessing?: {
+    /** AI Provider to use (openai, anthropic, lmstudio, ollama, gemini) */
+    provider: string;
+    /** API Key for the provider */
+    apiKey?: string;
+    /** Custom endpoint for local providers */
+    endpoint?: string;
+    /** Model to use */
+    model?: string;
+    /** Maximum tokens for response */
+    maxTokens?: number;
+    /** Temperature for response generation */
+    temperature?: number;
+    /** Whether to extract structured data */
+    extractStructuredData?: boolean;
+    /** Schema for structured data extraction */
+    schema?: Record<string, any>;
+    /** Whether to enable clarification mode */
+    clarificationMode?: boolean;
+    /** Language for responses */
+    language?: string;
+    /** Callback when AI processing is complete */
+    onAIResponse?: (response: any) => void;
+    /** Callback when AI processing fails */
+    onAIError?: (error: string) => void;
+  };
+  
   /** Placeholder text for the input area */
   placeholder?: string;
   

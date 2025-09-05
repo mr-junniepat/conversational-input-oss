@@ -8,9 +8,10 @@
   "files": [
     "dist",
     "README.md",
-    "CHANGELOG.md",
     "LICENSE",
-    "AI_INTEGRATION.md"
+    "demo.html",
+    "demo-template.html",
+    "DEMO_README.md"
   ],
   "scripts": {
     "build": "rollup -c",
@@ -35,18 +36,21 @@
     "openai",
     "anthropic",
     "ollama",
-    "llm"
+    "llm",
+    "clarifier",
+    "conversational-forms",
+    "mistral"
   ],
-  "author": "PromptForms",
+  "author": "Patrick Igwe <junniepat@gmail.com>",
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/promptforms/conversational-input"
+    "url": "https://github.com/mr-junniepat/conversational-input-oss.git"
   },
   "bugs": {
-    "url": "https://github.com/promptforms/conversational-input/issues"
+    "url": "https://github.com/mr-junniepat/conversational-input-oss/issues"
   },
-  "homepage": "https://github.com/promptforms/conversational-input#readme",
+  "homepage": "https://github.com/mr-junniepat/conversational-input-oss#readme",
   "peerDependencies": {
     "react": ">=16.8.0",
     "react-dom": ">=16.8.0"
@@ -55,8 +59,8 @@
     "@rollup/plugin-commonjs": "^25.0.0",
     "@rollup/plugin-node-resolve": "^15.0.0",
     "@rollup/plugin-typescript": "^11.0.0",
-    "@types/react": "^18.0.0",
-    "@types/react-dom": "^18.0.0",
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
     "rollup": "^3.0.0",
     "rollup-plugin-dts": "^5.0.0",
     "typescript": "^5.0.0"

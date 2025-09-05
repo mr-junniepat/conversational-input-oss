@@ -87,3 +87,11 @@ jspm_packages/
 
 # TernJS port file
 .tern-port
+
+# API Keys and sensitive data
+*.key
+*.env
+.env*
+api-keys.txt
+secrets.txt
+demo-local.html

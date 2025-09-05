@@ -29,7 +29,7 @@ export const AIProviderConfig: React.FC<AIProviderConfigProps> = ({
   const handleSave = () => {
     const config = {
       provider,
-      apiKey: provider === 'openai' || provider === 'anthropic' || provider === 'gemini' ? apiKey : undefined,
+      apiKey: provider === 'openai' || provider === 'anthropic' || provider === 'gemini' || provider === 'mistral' ? apiKey : undefined,
       endpoint: provider === 'lmstudio' || provider === 'ollama' ? endpoint : undefined,
       model: model || undefined
     };
@@ -67,7 +67,7 @@ export const AIProviderConfig: React.FC<AIProviderConfigProps> = ({
           description: 'Local AI models for privacy',
           icon: '🏠',
           needsApiKey: false,
-          defaultModel: 'local-model',
+          defaultModel: 'openai/gpt-oss-20b',
           defaultEndpoint: 'http://localhost:1234/v1/chat/completions'
         };
       case 'ollama':
@@ -88,6 +88,15 @@ export const AIProviderConfig: React.FC<AIProviderConfigProps> = ({
           defaultModel: 'gemini-pro',
           defaultEndpoint: ''
         };
+      case 'mistral':
+        return {
+          name: 'Mistral Cloud',
+          description: 'Mistral\'s powerful AI models',
+          icon: '🌪️',
+          needsApiKey: true,
+          defaultModel: 'mistral-large-latest',
+          defaultEndpoint: ''
+        };
       default:
         return {
           name: 'Unknown',
@@ -103,7 +112,7 @@ export const AIProviderConfig: React.FC<AIProviderConfigProps> = ({
   const providerInfo = getProviderInfo(provider);
 
   return (
-    <div className="bg-white rounded-2xl shadow-lg p-6 border border-gray-200">
+    <div className="bg-white rounded-2xl  p-6 border border-gray-200">
       <div className="flex items-center space-x-3 mb-6">
         <div className="w-10 h-10 bg-blue-100 rounded-xl flex items-center justify-center">
           <Settings className="w-5 h-5 text-blue-600" />
@@ -120,7 +129,7 @@ export const AIProviderConfig: React.FC<AIProviderConfigProps> = ({
           Choose AI Provider
         </label>
         <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
-          {['openai', 'anthropic', 'lmstudio', 'ollama', 'gemini'].map((providerId) => {
+          {['openai', 'anthropic', 'lmstudio', 'ollama', 'gemini', 'mistral'].map((providerId) => {
             const info = getProviderInfo(providerId);
             return (
               <button
@@ -158,7 +167,7 @@ export const AIProviderConfig: React.FC<AIProviderConfigProps> = ({
               value={apiKey}
               onChange={(e) => setApiKey(e.target.value)}
               placeholder={`Enter your ${providerInfo.name} API key`}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900"
             />
             <p className="text-xs text-gray-500 mt-1">
               Your API key is stored locally and never sent to our servers
@@ -177,7 +186,7 @@ export const AIProviderConfig: React.FC<AIProviderConfigProps> = ({
               value={endpoint}
               onChange={(e) => setEndpoint(e.target.value)}
               placeholder={providerInfo.defaultEndpoint}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900"
             />
             <p className="text-xs text-gray-500 mt-1">
               Make sure your local AI service is running

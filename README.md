@@ -2,11 +2,16 @@
 
 > **The most flexible conversational input component for React applications**
 
+## 🚀 **[Try Live Demo →](https://promptforms-hr.vercel.app/ai-demo)**
+
+Experience the full power of conversational AI forms in action! Configure your AI provider and see how natural language transforms into structured data.
+
 [![npm version](https://badge.fury.io/js/@junniepat/conversational-ai-input.svg)](https://badge.fury.io/js/@junniepat/conversational-ai-input)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![TypeScript](https://img.shields.io/badge/TypeScript-007ACC?logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
 [![React](https://img.shields.io/badge/React-20232A?logo=react&logoColor=61DAFB)](https://reactjs.org/)
 [![GitHub](https://img.shields.io/badge/GitHub-Repository-blue?logo=github)](https://github.com/mr-junniepat/conversational-input-oss)
+[![Live Demo](https://img.shields.io/badge/Live_Demo-Try_Now-purple?logo=vercel)](https://promptforms-hr.vercel.app/ai-demo)
 
 <img width="871" height="454" alt="Screenshot 2025-09-03 at 2 50 14 AM" src="https://github.com/user-attachments/assets/7690e1d8-067c-45cb-860e-3e6d16c13973" />
 

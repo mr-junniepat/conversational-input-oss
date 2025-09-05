@@ -24,6 +24,15 @@ export interface ConversationalInputProps {
     clarificationMode?: boolean;
     /** Language for responses */
     language?: string;
+    /** Custom system prompt to override the default */
+    systemPrompt?: string;
+    /** Custom user prompt template (use {text} and {files} as placeholders) */
+    userPromptTemplate?: string;
+    /** Custom prompt builder function for advanced customization */
+    customPromptBuilder?: (text: string, files?: File[], options?: any) => {
+      systemPrompt: string;
+      userPrompt: string;
+    };
     /** Callback when AI processing is complete */
     onAIResponse?: (response: any) => void;
     /** Callback when AI processing fails */

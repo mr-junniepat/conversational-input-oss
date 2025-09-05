@@ -21,6 +21,12 @@ export interface ProcessingOptions {
     schema?: Record<string, any>;
     clarificationMode?: boolean;
     language?: string;
+    systemPrompt?: string;
+    userPromptTemplate?: string;
+    customPromptBuilder?: (text: string, files?: File[], options?: ProcessingOptions) => {
+        systemPrompt: string;
+        userPrompt: string;
+    };
 }
 export declare class AIServiceManager {
     private providers;
@@ -44,6 +50,7 @@ export declare class AIServiceManager {
     processText(providerId: string, text: string, files?: File[], options?: ProcessingOptions): Promise<AIResponse>;
     private processWithOpenAI;
     private processWithAnthropic;
+    private processWithMistral;
     private processWithLMStudio;
     private processWithOllama;
     private processWithGemini;

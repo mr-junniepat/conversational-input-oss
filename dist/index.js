@@ -601,6 +601,13 @@ class AIServiceManager {
             maxTokens: 1000,
             temperature: 0.1
         });
+        // Mistral Cloud
+        this.providers.set('mistral', {
+            name: 'Mistral Cloud',
+            model: 'mistral-large-latest',
+            maxTokens: 1000,
+            temperature: 0.1
+        });
         // LM Studio
         this.providers.set('lmstudio', {
             name: 'LM Studio',
@@ -657,6 +664,7 @@ class AIServiceManager {
         switch (providerId) {
             case 'openai':
             case 'anthropic':
+            case 'mistral':
             case 'gemini':
                 return !!provider.apiKey;
             case 'lmstudio':
@@ -689,6 +697,8 @@ class AIServiceManager {
                     return await this.processWithOpenAI(provider, text, files, options);
                 case 'anthropic':
                     return await this.processWithAnthropic(provider, text, files, options);
+                case 'mistral':
+                    return await this.processWithMistral(provider, text, files, options);
                 case 'lmstudio':
                     return await this.processWithLMStudio(provider, text, files, options);
                 case 'ollama':
@@ -781,6 +791,45 @@ class AIServiceManager {
                 promptTokens: data.usage?.input_tokens || 0,
                 completionTokens: data.usage?.output_tokens || 0,
                 totalTokens: (data.usage?.input_tokens || 0) + (data.usage?.output_tokens || 0)
+            }
+        };
+    }
+    async processWithMistral(provider, text, files, options = {}) {
+        const prompt = this.buildPrompt(text, files, options);
+        const response = await fetch('https://api.mistral.ai/v1/chat/completions', {
+            method: 'POST',
+            headers: {
+                'Authorization': `Bearer ${provider.apiKey}`,
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                model: provider.model || 'mistral-large-latest',
+                messages: [
+                    {
+                        role: 'system',
+                        content: this.getSystemPrompt(options)
+                    },
+                    {
+                        role: 'user',
+                        content: prompt
+                    }
+                ],
+                max_tokens: provider.maxTokens || 1000,
+                temperature: provider.temperature || 0.1,
+                stream: false
+            })
+        });
+        if (!response.ok) {
+            throw new Error(`Mistral API error: ${response.status} ${response.statusText}`);
+        }
+        const data = await response.json();
+        return {
+            success: true,
+            data: this.parseAIResponse(data, options),
+            usage: {
+                promptTokens: data.usage?.prompt_tokens || 0,
+                completionTokens: data.usage?.completion_tokens || 0,
+                totalTokens: data.usage?.total_tokens || 0
             }
         };
     }
@@ -892,6 +941,22 @@ class AIServiceManager {
         };
     }
     buildPrompt(text, files, options = {}) {
+        // Use custom prompt builder if provided
+        if (options.customPromptBuilder) {
+            const customPrompts = options.customPromptBuilder(text, files, options);
+            return customPrompts.userPrompt;
+        }
+        // Use custom user prompt template if provided
+        if (options.userPromptTemplate) {
+            let prompt = options.userPromptTemplate;
+            // Replace placeholders
+            prompt = prompt.replace(/{text}/g, text);
+            prompt = prompt.replace(/{files}/g, files && files.length > 0
+                ? files.map(f => f.name).join(', ')
+                : 'No files attached');
+            return prompt;
+        }
+        // Default prompt building
         let prompt = `User Input: ${text}`;
         if (files && files.length > 0) {
             prompt += `\n\nAttached Files: ${files.map(f => f.name).join(', ')}`;
@@ -906,6 +971,16 @@ class AIServiceManager {
         return prompt;
     }
     getSystemPrompt(options = {}) {
+        // Use custom prompt builder if provided
+        if (options.customPromptBuilder) {
+            const customPrompts = options.customPromptBuilder('', [], options);
+            return customPrompts.systemPrompt;
+        }
+        // Use custom system prompt if provided
+        if (options.systemPrompt) {
+            return options.systemPrompt;
+        }
+        // Default system prompt building
         let systemPrompt = "You are a helpful AI assistant that processes user input and extracts relevant information.";
         if (options.extractStructuredData) {
             systemPrompt += " Extract the requested information and return it as structured JSON data.";
@@ -978,7 +1053,10 @@ function useAIProcessing(options) {
                 extractStructuredData: options.extractStructuredData,
                 schema: options.schema,
                 clarificationMode: options.clarificationMode,
-                language: options.language
+                language: options.language,
+                systemPrompt: options.systemPrompt,
+                userPromptTemplate: options.userPromptTemplate,
+                customPromptBuilder: options.customPromptBuilder
             };
             const response = await aiServiceManager.processText(options.provider, text, files, processingOptions);
             setLastResponse(response);
@@ -1025,7 +1103,10 @@ className = "", showClearButton = true, labels = {}, enableVoice = true, enableF
         extractStructuredData: aiProcessing?.extractStructuredData,
         schema: aiProcessing?.schema,
         clarificationMode: aiProcessing?.clarificationMode,
-        language: aiProcessing?.language
+        language: aiProcessing?.language,
+        systemPrompt: aiProcessing?.systemPrompt,
+        userPromptTemplate: aiProcessing?.userPromptTemplate,
+        customPromptBuilder: aiProcessing?.customPromptBuilder
     });
     // Use controlled value if provided
     const displayText = controlledValue !== undefined ? controlledValue : text;
@@ -1459,6 +1540,427 @@ const RenderProps = () => {
                 } }), jsxRuntimeExports.jsxs("div", { className: "mt-4 text-sm text-gray-500", children: [jsxRuntimeExports.jsx("p", { children: "\u2705 Custom voice button with recording state" }), jsxRuntimeExports.jsx("p", { children: "\u2705 Custom file button with accepted types" }), jsxRuntimeExports.jsx("p", { children: "\u2705 Custom submit button with loading state" }), jsxRuntimeExports.jsx("p", { children: "\u2705 Custom clear button styling" }), jsxRuntimeExports.jsx("p", { children: "\u2705 Enhanced file display with file info" }), jsxRuntimeExports.jsx("p", { children: "\u2705 Custom error display with icon" })] })] }));
 };
 
+/**
+ * Example demonstrating custom prompt customization
+ */
+const CustomPromptsExample = () => {
+    const [result, setResult] = React.useState(null);
+    const [error, setError] = React.useState(null);
+    // Example 1: Custom System Prompt
+    const customSystemPromptExample = {
+        provider: 'openai',
+        apiKey: 'your-openai-api-key',
+        model: 'gpt-3.5-turbo',
+        systemPrompt: `You are a professional HR assistant specializing in candidate evaluation. 
+    Your role is to analyze job applications and provide structured feedback.
+    
+    Guidelines:
+    - Be professional and objective
+    - Focus on relevant skills and experience
+    - Identify potential red flags
+    - Provide constructive feedback
+    - Always maintain confidentiality`,
+        extractStructuredData: true,
+        schema: {
+            "candidate_name": "Full name of the candidate",
+            "relevant_experience": "Years of relevant work experience",
+            "key_skills": "List of key technical and soft skills mentioned",
+            "education": "Educational background and qualifications",
+            "strengths": "Notable strengths and positive attributes",
+            "concerns": "Any potential concerns or gaps",
+            "overall_rating": "Overall rating from 1-10",
+            "recommendation": "Hire/No Hire/Interview recommendation"
+        },
+        onAIResponse: (response) => {
+            setResult(response);
+            setError(null);
+        },
+        onAIError: (error) => {
+            setError(error);
+            setResult(null);
+        }
+    };
+    // Example 2: Custom User Prompt Template
+    const customUserPromptExample = {
+        provider: 'anthropic',
+        apiKey: 'your-anthropic-api-key',
+        model: 'claude-3-haiku-20240307',
+        userPromptTemplate: `Please analyze this job application:
+
+Application Details:
+{text}
+
+Attached Documents:
+{files}
+
+Please provide a comprehensive evaluation focusing on:
+1. Technical qualifications
+2. Relevant experience
+3. Cultural fit indicators
+4. Potential concerns
+5. Interview recommendations
+
+Format your response as structured JSON data.`,
+        extractStructuredData: true,
+        onAIResponse: (response) => {
+            setResult(response);
+            setError(null);
+        },
+        onAIError: (error) => {
+            setError(error);
+            setResult(null);
+        }
+    };
+    // Example 3: Advanced Custom Prompt Builder
+    const advancedCustomPromptExample = {
+        provider: 'openai',
+        apiKey: 'your-openai-api-key',
+        model: 'gpt-4',
+        customPromptBuilder: (text, files, options) => {
+            const hasResume = files?.some(f => f.name.toLowerCase().includes('resume') || f.name.toLowerCase().includes('cv'));
+            const hasCoverLetter = files?.some(f => f.name.toLowerCase().includes('cover'));
+            const systemPrompt = `You are an expert HR recruiter with 15+ years of experience in talent acquisition.
+      
+Your expertise includes:
+- Technical skill assessment
+- Cultural fit evaluation  
+- Salary negotiation insights
+- Interview preparation guidance
+- Candidate experience optimization
+
+${hasResume ? 'A resume/CV has been provided for analysis.' : 'No resume/CV was provided.'}
+${hasCoverLetter ? 'A cover letter has been provided for analysis.' : 'No cover letter was provided.'}
+
+Provide detailed, actionable insights that will help the hiring team make informed decisions.`;
+            const userPrompt = `CANDIDATE APPLICATION ANALYSIS REQUEST
+
+Application Text:
+${text}
+
+${files && files.length > 0 ? `Supporting Documents:
+${files.map(f => `- ${f.name} (${(f.size / 1024).toFixed(1)}KB)`).join('\n')}` : 'No supporting documents provided.'}
+
+ANALYSIS REQUIREMENTS:
+Please provide a comprehensive analysis including:
+
+1. CANDIDATE OVERVIEW
+   - Professional summary
+   - Key qualifications
+   - Career progression
+
+2. TECHNICAL ASSESSMENT
+   - Required skills match
+   - Technical depth evaluation
+   - Learning potential
+
+3. EXPERIENCE EVALUATION
+   - Relevant work history
+   - Achievement highlights
+   - Industry experience
+
+4. CULTURAL FIT
+   - Communication style
+   - Team collaboration indicators
+   - Company values alignment
+
+5. RISK ASSESSMENT
+   - Potential concerns
+   - Red flags
+   - Mitigation strategies
+
+6. RECOMMENDATION
+   - Overall rating (1-10)
+   - Next steps
+   - Interview focus areas
+
+Format your response as structured JSON with clear sections and actionable insights.`;
+            return { systemPrompt, userPrompt };
+        },
+        extractStructuredData: true,
+        onAIResponse: (response) => {
+            setResult(response);
+            setError(null);
+        },
+        onAIError: (error) => {
+            setError(error);
+            setResult(null);
+        }
+    };
+    const handleSubmit = async (text, files) => {
+        console.log('Form submitted:', text, files);
+    };
+    return (jsxRuntimeExports.jsxs("div", { className: "max-w-4xl mx-auto p-6 space-y-8", children: [jsxRuntimeExports.jsxs("div", { className: "text-center", children: [jsxRuntimeExports.jsx("h1", { className: "text-3xl font-bold text-gray-900 mb-4", children: "Custom Prompts Examples" }), jsxRuntimeExports.jsx("p", { className: "text-lg text-gray-600", children: "Learn how to customize AI prompts for your specific use cases" })] }), jsxRuntimeExports.jsxs("div", { className: "bg-white rounded-lg shadow-md p-6", children: [jsxRuntimeExports.jsx("h2", { className: "text-xl font-semibold mb-4", children: "Example 1: Custom System Prompt" }), jsxRuntimeExports.jsx("p", { className: "text-gray-600 mb-4", children: "This example shows how to provide a custom system prompt that defines the AI's role and behavior." }), jsxRuntimeExports.jsx(ConversationalInput, { onSubmit: handleSubmit, aiProcessing: customSystemPromptExample, placeholder: "Paste a job application here to analyze...", enableFileUpload: true, acceptedFileTypes: ['.pdf', '.doc', '.docx', '.txt'], classNames: {
+                            container: "border border-gray-300 rounded-lg",
+                            textarea: "min-h-[120px] p-4",
+                            actionBar: "bg-gray-50 p-3 border-t border-gray-200"
+                        } })] }), jsxRuntimeExports.jsxs("div", { className: "bg-white rounded-lg shadow-md p-6", children: [jsxRuntimeExports.jsx("h2", { className: "text-xl font-semibold mb-4", children: "Example 2: Custom User Prompt Template" }), jsxRuntimeExports.jsx("p", { className: "text-gray-600 mb-4", children: "This example demonstrates using a custom user prompt template with placeholders for dynamic content." }), jsxRuntimeExports.jsx(ConversationalInput, { onSubmit: handleSubmit, aiProcessing: customUserPromptExample, placeholder: "Enter job application details...", enableFileUpload: true, acceptedFileTypes: ['.pdf', '.doc', '.docx', '.txt'], classNames: {
+                            container: "border border-gray-300 rounded-lg",
+                            textarea: "min-h-[120px] p-4",
+                            actionBar: "bg-gray-50 p-3 border-t border-gray-200"
+                        } })] }), jsxRuntimeExports.jsxs("div", { className: "bg-white rounded-lg shadow-md p-6", children: [jsxRuntimeExports.jsx("h2", { className: "text-xl font-semibold mb-4", children: "Example 3: Advanced Custom Prompt Builder" }), jsxRuntimeExports.jsx("p", { className: "text-gray-600 mb-4", children: "This example shows the most flexible approach using a custom prompt builder function that can adapt based on input content and files." }), jsxRuntimeExports.jsx(ConversationalInput, { onSubmit: handleSubmit, aiProcessing: advancedCustomPromptExample, placeholder: "Enter candidate information or paste application text...", enableFileUpload: true, acceptedFileTypes: ['.pdf', '.doc', '.docx', '.txt'], classNames: {
+                            container: "border border-gray-300 rounded-lg",
+                            textarea: "min-h-[120px] p-4",
+                            actionBar: "bg-gray-50 p-3 border-t border-gray-200"
+                        } })] }), (result || error) && (jsxRuntimeExports.jsxs("div", { className: "bg-white rounded-lg shadow-md p-6", children: [jsxRuntimeExports.jsx("h2", { className: "text-xl font-semibold mb-4", children: "AI Response" }), error && (jsxRuntimeExports.jsxs("div", { className: "bg-red-50 border border-red-200 rounded-lg p-4 mb-4", children: [jsxRuntimeExports.jsx("h3", { className: "text-red-800 font-medium", children: "Error:" }), jsxRuntimeExports.jsx("p", { className: "text-red-700", children: error })] })), result && (jsxRuntimeExports.jsxs("div", { className: "bg-green-50 border border-green-200 rounded-lg p-4", children: [jsxRuntimeExports.jsx("h3", { className: "text-green-800 font-medium mb-2", children: "Analysis Result:" }), jsxRuntimeExports.jsx("pre", { className: "bg-white p-3 rounded text-sm text-gray-800 overflow-auto max-h-96", children: JSON.stringify(result, null, 2) })] }))] })), jsxRuntimeExports.jsxs("div", { className: "bg-gray-50 rounded-lg p-6", children: [jsxRuntimeExports.jsx("h2", { className: "text-xl font-semibold mb-4", children: "Code Examples" }), jsxRuntimeExports.jsxs("div", { className: "space-y-6", children: [jsxRuntimeExports.jsxs("div", { children: [jsxRuntimeExports.jsx("h3", { className: "font-medium mb-2", children: "1. Custom System Prompt:" }), jsxRuntimeExports.jsx("pre", { className: "bg-white p-3 rounded text-sm overflow-auto", children: `<ConversationalInput
+  aiProcessing={{
+    provider: 'openai',
+    apiKey: 'your-api-key',
+    systemPrompt: \`You are a professional HR assistant specializing in candidate evaluation.
+    Your role is to analyze job applications and provide structured feedback.\`,
+    extractStructuredData: true,
+    schema: {
+      "candidate_name": "Full name of the candidate",
+      "relevant_experience": "Years of relevant work experience",
+      // ... more schema fields
+    }
+  }}
+/>` })] }), jsxRuntimeExports.jsxs("div", { children: [jsxRuntimeExports.jsx("h3", { className: "font-medium mb-2", children: "2. Custom User Prompt Template:" }), jsxRuntimeExports.jsx("pre", { className: "bg-white p-3 rounded text-sm overflow-auto", children: `<ConversationalInput
+  aiProcessing={{
+    provider: 'anthropic',
+    apiKey: 'your-api-key',
+    userPromptTemplate: \`Please analyze this job application:
+
+Application Details:
+{text}
+
+Attached Documents:
+{files}
+
+Please provide a comprehensive evaluation...\`,
+    extractStructuredData: true
+  }}
+/>` })] }), jsxRuntimeExports.jsxs("div", { children: [jsxRuntimeExports.jsx("h3", { className: "font-medium mb-2", children: "3. Advanced Custom Prompt Builder:" }), jsxRuntimeExports.jsx("pre", { className: "bg-white p-3 rounded text-sm overflow-auto", children: `<ConversationalInput
+  aiProcessing={{
+    provider: 'openai',
+    apiKey: 'your-api-key',
+    customPromptBuilder: (text, files, options) => {
+      const hasResume = files?.some(f => f.name.includes('resume'));
+      
+      return {
+        systemPrompt: \`You are an expert HR recruiter...\`,
+        userPrompt: \`CANDIDATE APPLICATION ANALYSIS REQUEST
+Application Text: \${text}
+\${hasResume ? 'Resume provided' : 'No resume'}\`
+      };
+    },
+    extractStructuredData: true
+  }}
+/>` })] })] })] })] }));
+};
+
+/**
+ * Live Demo showcasing ConversationalInput with Mistral Cloud
+ * This demo allows users to test the component before downloading
+ */
+const MistralCloudDemo = () => {
+    const [aiConfig, setAiConfig] = React.useState(null);
+    const [aiResult, setAiResult] = React.useState(null);
+    const [aiError, setAiError] = React.useState(null);
+    const [inputText, setInputText] = React.useState('');
+    const [activeDemo, setActiveDemo] = React.useState('basic');
+    // Demo configurations
+    const demos = {
+        basic: {
+            title: "Basic AI Processing",
+            description: "Simple text processing with Mistral Cloud",
+            config: {
+                provider: 'mistral',
+                model: 'mistral-large-latest',
+                extractStructuredData: false,
+                clarificationMode: false,
+                onAIResponse: (response) => {
+                    setAiResult(response);
+                    setAiError(null);
+                },
+                onAIError: (error) => {
+                    setAiError(error);
+                    setAiResult(null);
+                }
+            }
+        },
+        custom: {
+            title: "Custom System Prompt",
+            description: "HR Assistant with custom role definition",
+            config: {
+                provider: 'mistral',
+                model: 'mistral-large-latest',
+                systemPrompt: `You are a professional HR assistant specializing in candidate evaluation and recruitment.
+
+Your expertise includes:
+- Analyzing job applications and resumes
+- Identifying key skills and qualifications
+- Providing structured feedback
+- Making hiring recommendations
+- Ensuring fair and unbiased evaluation
+
+Guidelines:
+- Be professional and objective in your analysis
+- Focus on relevant skills and experience
+- Identify both strengths and areas for improvement
+- Provide actionable insights for hiring decisions
+- Always maintain confidentiality and respect`,
+                extractStructuredData: true,
+                schema: {
+                    "candidate_name": "Full name of the candidate",
+                    "relevant_experience": "Years of relevant work experience",
+                    "key_skills": "List of key technical and soft skills mentioned",
+                    "education": "Educational background and qualifications",
+                    "strengths": "Notable strengths and positive attributes",
+                    "concerns": "Any potential concerns or gaps",
+                    "overall_rating": "Overall rating from 1-10",
+                    "recommendation": "Hire/No Hire/Interview recommendation with reasoning"
+                },
+                onAIResponse: (response) => {
+                    setAiResult(response);
+                    setAiError(null);
+                },
+                onAIError: (error) => {
+                    setAiError(error);
+                    setAiResult(null);
+                }
+            }
+        },
+        advanced: {
+            title: "Advanced Custom Prompts",
+            description: "Dynamic prompt generation based on input content",
+            config: {
+                provider: 'mistral',
+                model: 'mistral-large-latest',
+                customPromptBuilder: (text, files, options) => {
+                    const hasResume = files?.some(f => f.name.toLowerCase().includes('resume') ||
+                        f.name.toLowerCase().includes('cv'));
+                    const hasCoverLetter = files?.some(f => f.name.toLowerCase().includes('cover'));
+                    const systemPrompt = `You are an expert HR recruiter with 15+ years of experience in talent acquisition and candidate evaluation.
+
+Your expertise includes:
+- Technical skill assessment across various industries
+- Cultural fit evaluation and team dynamics
+- Salary negotiation insights and market analysis
+- Interview preparation guidance and best practices
+- Candidate experience optimization and employer branding
+
+Current Analysis Context:
+${hasResume ? '✅ Resume/CV has been provided for detailed analysis' : '❌ No resume/CV was provided - analysis will be based on text input only'}
+${hasCoverLetter ? '✅ Cover letter has been provided for additional context' : '❌ No cover letter was provided'}
+
+Provide detailed, actionable insights that will help the hiring team make informed decisions. Focus on both technical qualifications and cultural fit indicators.`;
+                    const userPrompt = `🎯 CANDIDATE APPLICATION ANALYSIS REQUEST
+
+📋 Application Details:
+${text}
+
+${files && files.length > 0 ? `📎 Supporting Documents:
+${files.map(f => `- ${f.name} (${(f.size / 1024).toFixed(1)}KB)`).join('\n')}` : '📎 No supporting documents provided'}
+
+🔍 ANALYSIS REQUIREMENTS:
+
+1. 👤 CANDIDATE OVERVIEW
+   - Professional summary and background
+   - Key qualifications and achievements
+   - Career progression and growth trajectory
+
+2. 🛠️ TECHNICAL ASSESSMENT
+   - Required skills match analysis
+   - Technical depth and expertise evaluation
+   - Learning potential and adaptability
+
+3. 💼 EXPERIENCE EVALUATION
+   - Relevant work history and accomplishments
+   - Industry experience and domain knowledge
+   - Leadership and collaboration indicators
+
+4. 🤝 CULTURAL FIT
+   - Communication style and clarity
+   - Team collaboration indicators
+   - Company values alignment assessment
+
+5. ⚠️ RISK ASSESSMENT
+   - Potential concerns or red flags
+   - Gaps in experience or skills
+   - Mitigation strategies and recommendations
+
+6. 🎯 RECOMMENDATION
+   - Overall rating (1-10) with detailed justification
+   - Next steps and interview focus areas
+   - Specific questions to ask during interviews
+
+Format your response as structured JSON with clear sections, actionable insights, and specific examples from the application.`;
+                    return { systemPrompt, userPrompt };
+                },
+                extractStructuredData: true,
+                onAIResponse: (response) => {
+                    setAiResult(response);
+                    setAiError(null);
+                },
+                onAIError: (error) => {
+                    setAiError(error);
+                    setAiResult(null);
+                }
+            }
+        }
+    };
+    const handleSubmit = async (text, files) => {
+        console.log('Form submitted:', text, files);
+        // This onSubmit will be called AFTER AI processing if aiProcessing is configured
+    };
+    const currentDemo = demos[activeDemo];
+    return (jsxRuntimeExports.jsxs("div", { className: "min-h-screen bg-gradient-to-br from-slate-50 via-white to-blue-50", children: [jsxRuntimeExports.jsx("div", { className: "bg-white shadow-sm border-b", children: jsxRuntimeExports.jsx("div", { className: "max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6", children: jsxRuntimeExports.jsxs("div", { className: "text-center", children: [jsxRuntimeExports.jsxs("h1", { className: "text-4xl font-bold text-gray-900 mb-4 flex items-center justify-center gap-3", children: [jsxRuntimeExports.jsx(lucideReact.Sparkles, { className: "w-10 h-10 text-purple-600" }), "ConversationalInput Live Demo"] }), jsxRuntimeExports.jsx("p", { className: "text-xl text-gray-600 mb-6", children: "Test the power of conversational AI input with Mistral Cloud" }), jsxRuntimeExports.jsxs("div", { className: "flex items-center justify-center gap-2 text-sm text-gray-500", children: [jsxRuntimeExports.jsx(lucideReact.Bot, { className: "w-4 h-4" }), "Powered by Mistral Cloud AI"] })] }) }) }), jsxRuntimeExports.jsxs("div", { className: "max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8", children: [jsxRuntimeExports.jsxs("div", { className: "mb-8", children: [jsxRuntimeExports.jsx("h2", { className: "text-2xl font-semibold text-gray-900 mb-4", children: "Choose a Demo" }), jsxRuntimeExports.jsx("div", { className: "grid grid-cols-1 md:grid-cols-3 gap-4", children: Object.entries(demos).map(([key, demo]) => (jsxRuntimeExports.jsxs("button", { onClick: () => setActiveDemo(key), className: `p-6 rounded-lg border-2 transition-all duration-200 text-left ${activeDemo === key
+                                        ? 'border-purple-500 bg-purple-50 shadow-md'
+                                        : 'border-gray-200 bg-white hover:border-gray-300 hover:shadow-sm'}`, children: [jsxRuntimeExports.jsx("h3", { className: "text-lg font-semibold text-gray-900 mb-2", children: demo.title }), jsxRuntimeExports.jsx("p", { className: "text-sm text-gray-600", children: demo.description }), activeDemo === key && (jsxRuntimeExports.jsxs("div", { className: "mt-3 flex items-center text-purple-600", children: [jsxRuntimeExports.jsx(lucideReact.CheckCircle, { className: "w-4 h-4 mr-1" }), jsxRuntimeExports.jsx("span", { className: "text-sm font-medium", children: "Active" })] }))] }, key))) })] }), jsxRuntimeExports.jsx("div", { className: "mb-8", children: jsxRuntimeExports.jsxs("div", { className: "bg-white rounded-xl shadow-lg p-6", children: [jsxRuntimeExports.jsxs("h2", { className: "text-2xl font-semibold text-gray-900 mb-4 flex items-center gap-2", children: [jsxRuntimeExports.jsx(lucideReact.Settings, { className: "w-6 h-6 text-blue-600" }), "AI Configuration"] }), jsxRuntimeExports.jsxs("p", { className: "text-gray-600 mb-4", children: ["Configure your Mistral Cloud API key to test the component.", jsxRuntimeExports.jsx("a", { href: "https://console.mistral.ai/", target: "_blank", rel: "noopener noreferrer", className: "text-blue-600 hover:text-blue-800 ml-1", children: "Get your API key here" })] }), jsxRuntimeExports.jsx(AIProviderConfig, { onConfigure: setAiConfig })] }) }), aiConfig && (jsxRuntimeExports.jsxs("div", { className: "grid grid-cols-1 lg:grid-cols-2 gap-8", children: [jsxRuntimeExports.jsxs("div", { className: "bg-white rounded-xl shadow-lg p-6", children: [jsxRuntimeExports.jsxs("h2", { className: "text-2xl font-semibold text-gray-900 mb-4 flex items-center gap-2", children: [jsxRuntimeExports.jsx(lucideReact.MessageSquare, { className: "w-6 h-6 text-green-600" }), currentDemo.title] }), jsxRuntimeExports.jsx("p", { className: "text-gray-600 mb-4", children: currentDemo.description }), jsxRuntimeExports.jsx(ConversationalInput, { onSubmit: handleSubmit, placeholder: "Try typing something like: 'I'm a software engineer with 5 years of experience in React and Node.js, looking for a senior developer position...'", aiProcessing: {
+                                            ...aiConfig,
+                                            ...currentDemo.config
+                                        }, value: inputText, onTextChange: setInputText, showClearButton: true, enableFileUpload: true, acceptedFileTypes: ['.pdf', '.doc', '.docx', '.txt'], maxFileSize: 10 * 1024 * 1024, classNames: {
+                                            container: "border border-gray-300 rounded-lg shadow-sm",
+                                            textarea: "min-h-[150px] p-4 text-base",
+                                            actionBar: "bg-gray-100 p-3 flex justify-between items-center border-t border-gray-200",
+                                            voiceButton: "bg-blue-600 text-white hover:bg-blue-700",
+                                            fileButton: "bg-green-600 text-white hover:bg-green-700",
+                                            submitButton: "bg-purple-600 text-white hover:bg-purple-700",
+                                            clearButton: "bg-red-500 text-white hover:bg-red-600",
+                                            fileDisplay: "p-2 bg-white border-t border-gray-200",
+                                            errorDisplay: "p-3 bg-red-100 text-red-800 rounded-b-lg"
+                                        } }), jsxRuntimeExports.jsxs("div", { className: "mt-6", children: [jsxRuntimeExports.jsx("h3", { className: "text-sm font-medium text-gray-700 mb-2", children: "Try these sample inputs:" }), jsxRuntimeExports.jsx("div", { className: "space-y-2", children: [
+                                                    "I'm a marketing manager with 8 years of experience in digital marketing, SEO, and social media management.",
+                                                    "Software developer specializing in Python, Django, and machine learning. I have a Master's in Computer Science.",
+                                                    "Customer service representative with excellent communication skills and 3 years of experience in retail."
+                                                ].map((sample, index) => (jsxRuntimeExports.jsx("button", { onClick: () => setInputText(sample), className: "block w-full text-left p-2 text-sm text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded border border-gray-200", children: sample }, index))) })] })] }), jsxRuntimeExports.jsxs("div", { className: "space-y-6", children: [aiResult && (jsxRuntimeExports.jsxs("div", { className: "bg-white rounded-xl shadow-lg p-6", children: [jsxRuntimeExports.jsxs("h3", { className: "text-xl font-semibold text-green-800 mb-3 flex items-center gap-2", children: [jsxRuntimeExports.jsx(lucideReact.CheckCircle, { className: "w-5 h-5" }), "AI Response"] }), jsxRuntimeExports.jsx("div", { className: "bg-green-50 border border-green-200 rounded-lg p-4", children: jsxRuntimeExports.jsx("pre", { className: "text-sm text-green-900 whitespace-pre-wrap overflow-auto max-h-96", children: typeof aiResult === 'string' ? aiResult : JSON.stringify(aiResult, null, 2) }) })] })), aiError && (jsxRuntimeExports.jsxs("div", { className: "bg-white rounded-xl shadow-lg p-6", children: [jsxRuntimeExports.jsxs("h3", { className: "text-xl font-semibold text-red-800 mb-3 flex items-center gap-2", children: [jsxRuntimeExports.jsx(lucideReact.AlertCircle, { className: "w-5 h-5" }), "Error"] }), jsxRuntimeExports.jsx("div", { className: "bg-red-50 border border-red-200 rounded-lg p-4", children: jsxRuntimeExports.jsx("p", { className: "text-red-700", children: aiError }) })] })), jsxRuntimeExports.jsxs("div", { className: "bg-white rounded-xl shadow-lg p-6", children: [jsxRuntimeExports.jsxs("h3", { className: "text-xl font-semibold text-gray-900 mb-4 flex items-center gap-2", children: [jsxRuntimeExports.jsx(lucideReact.Star, { className: "w-5 h-5 text-yellow-500" }), "Component Features"] }), jsxRuntimeExports.jsxs("div", { className: "grid grid-cols-1 sm:grid-cols-2 gap-4", children: [jsxRuntimeExports.jsxs("div", { className: "flex items-center gap-3", children: [jsxRuntimeExports.jsx(lucideReact.Mic, { className: "w-5 h-5 text-blue-600" }), jsxRuntimeExports.jsx("span", { className: "text-sm text-gray-700", children: "Voice Input" })] }), jsxRuntimeExports.jsxs("div", { className: "flex items-center gap-3", children: [jsxRuntimeExports.jsx(lucideReact.Upload, { className: "w-5 h-5 text-green-600" }), jsxRuntimeExports.jsx("span", { className: "text-sm text-gray-700", children: "File Upload" })] }), jsxRuntimeExports.jsxs("div", { className: "flex items-center gap-3", children: [jsxRuntimeExports.jsx(lucideReact.Zap, { className: "w-5 h-5 text-purple-600" }), jsxRuntimeExports.jsx("span", { className: "text-sm text-gray-700", children: "AI Processing" })] }), jsxRuntimeExports.jsxs("div", { className: "flex items-center gap-3", children: [jsxRuntimeExports.jsx(lucideReact.Shield, { className: "w-5 h-5 text-red-600" }), jsxRuntimeExports.jsx("span", { className: "text-sm text-gray-700", children: "Input Validation" })] }), jsxRuntimeExports.jsxs("div", { className: "flex items-center gap-3", children: [jsxRuntimeExports.jsx(lucideReact.Users, { className: "w-5 h-5 text-indigo-600" }), jsxRuntimeExports.jsx("span", { className: "text-sm text-gray-700", children: "Custom Prompts" })] }), jsxRuntimeExports.jsxs("div", { className: "flex items-center gap-3", children: [jsxRuntimeExports.jsx(lucideReact.FileText, { className: "w-5 h-5 text-orange-600" }), jsxRuntimeExports.jsx("span", { className: "text-sm text-gray-700", children: "Structured Output" })] })] })] }), jsxRuntimeExports.jsxs("div", { className: "bg-white rounded-xl shadow-lg p-6", children: [jsxRuntimeExports.jsxs("h3", { className: "text-xl font-semibold text-gray-900 mb-4 flex items-center gap-2", children: [jsxRuntimeExports.jsx(lucideReact.Code, { className: "w-5 h-5 text-gray-600" }), "Code Example"] }), jsxRuntimeExports.jsx("div", { className: "bg-gray-900 rounded-lg p-4 overflow-auto", children: jsxRuntimeExports.jsx("pre", { className: "text-sm text-green-400", children: `import { ConversationalInput } from '@junniepat/conversational-ai-input';
+
+<ConversationalInput
+  onSubmit={handleSubmit}
+  aiProcessing={{
+    provider: 'mistral',
+    apiKey: 'your-mistral-api-key',
+    model: 'mistral-large-latest',
+    systemPrompt: 'You are a professional HR assistant...',
+    extractStructuredData: true,
+    schema: {
+      "candidate_name": "Full name",
+      "experience": "Years of experience"
+    }
+  }}
+  placeholder="Tell me about yourself..."
+  enableFileUpload={true}
+  enableVoice={true}
+/>` }) })] })] })] })), jsxRuntimeExports.jsxs("div", { className: "mt-12 bg-white rounded-xl shadow-lg p-8", children: [jsxRuntimeExports.jsx("h2", { className: "text-3xl font-bold text-gray-900 mb-6 text-center", children: "Ready to Use in Your Project?" }), jsxRuntimeExports.jsxs("div", { className: "grid grid-cols-1 md:grid-cols-2 gap-8", children: [jsxRuntimeExports.jsxs("div", { children: [jsxRuntimeExports.jsx("h3", { className: "text-xl font-semibold text-gray-900 mb-4", children: "Installation" }), jsxRuntimeExports.jsx("div", { className: "bg-gray-900 rounded-lg p-4 mb-4", children: jsxRuntimeExports.jsx("pre", { className: "text-sm text-green-400", children: `npm install @junniepat/conversational-ai-input
+
+# or
+
+yarn add @junniepat/conversational-ai-input
+
+# or
+
+pnpm add @junniepat/conversational-ai-input` }) })] }), jsxRuntimeExports.jsxs("div", { children: [jsxRuntimeExports.jsx("h3", { className: "text-xl font-semibold text-gray-900 mb-4", children: "Quick Start" }), jsxRuntimeExports.jsx("div", { className: "bg-gray-900 rounded-lg p-4", children: jsxRuntimeExports.jsx("pre", { className: "text-sm text-green-400", children: `import { ConversationalInput } from '@junniepat/conversational-ai-input';
+
+function App() {
+  return (
+    <ConversationalInput
+      onSubmit={(text, files) => console.log(text, files)}
+      placeholder="Start typing..."
+    />
+  );
+}` }) })] })] }), jsxRuntimeExports.jsx("div", { className: "text-center mt-8", children: jsxRuntimeExports.jsxs("a", { href: "https://github.com/mr-junniepat/conversational-input-oss", target: "_blank", rel: "noopener noreferrer", className: "inline-flex items-center gap-2 bg-purple-600 text-white px-6 py-3 rounded-lg hover:bg-purple-700 transition-colors", children: [jsxRuntimeExports.jsx(lucideReact.Play, { className: "w-4 h-4" }), "View on GitHub"] }) })] })] })] }));
+};
+
 const AIIntegrationExample = () => {
     const [aiResponse, setAIResponse] = React.useState(null);
     const [aiError, setAIError] = React.useState(null);
@@ -1705,12 +2207,14 @@ exports.BasicUsage = BasicUsage;
 exports.BasicUsageExample = BasicUsage;
 exports.Clarifier = Clarifier;
 exports.ConversationalInput = ConversationalInput;
+exports.CustomPromptsExample = CustomPromptsExample;
 exports.CustomStyling = CustomStyling;
 exports.CustomStylingExample = CustomStyling;
 exports.FormIntegration = FormIntegration;
 exports.FormIntegrationExample = FormIntegration;
 exports.LocalLLM = LocalLLM;
 exports.LocalLLMExample = LocalLLM;
+exports.MistralCloudDemo = MistralCloudDemo;
 exports.OpenAI = OpenAI;
 exports.OpenAIExample = OpenAI;
 exports.RenderProps = RenderProps;

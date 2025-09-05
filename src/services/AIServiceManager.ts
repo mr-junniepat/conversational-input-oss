@@ -23,6 +23,12 @@ export interface ProcessingOptions {
   schema?: Record<string, any>;
   clarificationMode?: boolean;
   language?: string;
+  systemPrompt?: string;
+  userPromptTemplate?: string;
+  customPromptBuilder?: (text: string, files?: File[], options?: ProcessingOptions) => {
+    systemPrompt: string;
+    userPrompt: string;
+  };
 }
 
 export class AIServiceManager {
@@ -46,6 +52,14 @@ export class AIServiceManager {
     this.providers.set('anthropic', {
       name: 'Anthropic',
       model: 'claude-3-haiku-20240307',
+      maxTokens: 1000,
+      temperature: 0.1
+    });
+
+    // Mistral Cloud
+    this.providers.set('mistral', {
+      name: 'Mistral Cloud',
+      model: 'mistral-large-latest',
       maxTokens: 1000,
       temperature: 0.1
     });
@@ -110,6 +124,7 @@ export class AIServiceManager {
     switch (providerId) {
       case 'openai':
       case 'anthropic':
+      case 'mistral':
       case 'gemini':
         return !!provider.apiKey;
       case 'lmstudio':
@@ -150,6 +165,8 @@ export class AIServiceManager {
           return await this.processWithOpenAI(provider, text, files, options);
         case 'anthropic':
           return await this.processWithAnthropic(provider, text, files, options);
+        case 'mistral':
+          return await this.processWithMistral(provider, text, files, options);
         case 'lmstudio':
           return await this.processWithLMStudio(provider, text, files, options);
         case 'ollama':
@@ -261,6 +278,55 @@ export class AIServiceManager {
         promptTokens: data.usage?.input_tokens || 0,
         completionTokens: data.usage?.output_tokens || 0,
         totalTokens: (data.usage?.input_tokens || 0) + (data.usage?.output_tokens || 0)
+      }
+    };
+  }
+
+  private async processWithMistral(
+    provider: AIProvider,
+    text: string,
+    files?: File[],
+    options: ProcessingOptions = {}
+  ): Promise<AIResponse> {
+    const prompt = this.buildPrompt(text, files, options);
+
+    const response = await fetch('https://api.mistral.ai/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${provider.apiKey}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        model: provider.model || 'mistral-large-latest',
+        messages: [
+          {
+            role: 'system',
+            content: this.getSystemPrompt(options)
+          },
+          {
+            role: 'user',
+            content: prompt
+          }
+        ],
+        max_tokens: provider.maxTokens || 1000,
+        temperature: provider.temperature || 0.1,
+        stream: false
+      })
+    });
+
+    if (!response.ok) {
+      throw new Error(`Mistral API error: ${response.status} ${response.statusText}`);
+    }
+
+    const data = await response.json();
+    
+    return {
+      success: true,
+      data: this.parseAIResponse(data, options),
+      usage: {
+        promptTokens: data.usage?.prompt_tokens || 0,
+        completionTokens: data.usage?.completion_tokens || 0,
+        totalTokens: data.usage?.total_tokens || 0
       }
     };
   }
@@ -403,6 +469,26 @@ export class AIServiceManager {
   }
 
   private buildPrompt(text: string, files?: File[], options: ProcessingOptions = {}): string {
+    // Use custom prompt builder if provided
+    if (options.customPromptBuilder) {
+      const customPrompts = options.customPromptBuilder(text, files, options);
+      return customPrompts.userPrompt;
+    }
+
+    // Use custom user prompt template if provided
+    if (options.userPromptTemplate) {
+      let prompt = options.userPromptTemplate;
+      
+      // Replace placeholders
+      prompt = prompt.replace(/{text}/g, text);
+      prompt = prompt.replace(/{files}/g, files && files.length > 0 
+        ? files.map(f => f.name).join(', ') 
+        : 'No files attached');
+      
+      return prompt;
+    }
+
+    // Default prompt building
     let prompt = `User Input: ${text}`;
     
     if (files && files.length > 0) {
@@ -421,6 +507,18 @@ export class AIServiceManager {
   }
 
   private getSystemPrompt(options: ProcessingOptions = {}): string {
+    // Use custom prompt builder if provided
+    if (options.customPromptBuilder) {
+      const customPrompts = options.customPromptBuilder('', [], options);
+      return customPrompts.systemPrompt;
+    }
+
+    // Use custom system prompt if provided
+    if (options.systemPrompt) {
+      return options.systemPrompt;
+    }
+
+    // Default system prompt building
     let systemPrompt = "You are a helpful AI assistant that processes user input and extracts relevant information.";
     
     if (options.extractStructuredData) {

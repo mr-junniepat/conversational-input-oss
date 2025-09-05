@@ -13,6 +13,25 @@
 
 A powerful, flexible React component that transforms any form input into a conversational, AI-ready interface. Perfect for job applications, customer support, surveys, and any scenario where you want to gather information naturally.
 
+## 🎯 **Try the Live Demo**
+
+Experience the component in action with our interactive demo powered by Mistral Cloud AI:
+
+```tsx
+import { MistralCloudDemo } from '@junniepat/conversational-ai-input/examples';
+
+function App() {
+  return <MistralCloudDemo />;
+}
+```
+
+The demo includes:
+- ✅ **Live AI Processing** with Mistral Cloud
+- ✅ **Multiple Demo Modes** (Basic, Custom Prompts, Advanced)
+- ✅ **Interactive Configuration** for testing different setups
+- ✅ **Sample Inputs** to try various scenarios
+- ✅ **Code Examples** and installation instructions
+
 ## ✨ **Features**
 
 - 🎤 **Voice Input**: Built-in speech-to-text with Web Speech API

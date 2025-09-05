@@ -12,6 +12,12 @@ export interface UseAIProcessingOptions {
   schema?: Record<string, any>;
   clarificationMode?: boolean;
   language?: string;
+  systemPrompt?: string;
+  userPromptTemplate?: string;
+  customPromptBuilder?: (text: string, files?: File[], options?: ProcessingOptions) => {
+    systemPrompt: string;
+    userPrompt: string;
+  };
 }
 
 export interface UseAIProcessingReturn {
@@ -62,7 +68,10 @@ export function useAIProcessing(options: UseAIProcessingOptions): UseAIProcessin
         extractStructuredData: options.extractStructuredData,
         schema: options.schema,
         clarificationMode: options.clarificationMode,
-        language: options.language
+        language: options.language,
+        systemPrompt: options.systemPrompt,
+        userPromptTemplate: options.userPromptTemplate,
+        customPromptBuilder: options.customPromptBuilder
       };
 
       const response = await aiServiceManager.processText(

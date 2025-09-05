@@ -85,6 +85,49 @@ function App() {
 - ✅ Enhanced file display with file info
 - ✅ Custom error display with icon
 
+### **5. Custom Prompts** (`CustomPrompts.tsx`)
+**File**: `src/examples/CustomPrompts.tsx`
+
+Demonstrates how to customize AI prompts for specific use cases and domains.
+
+```tsx
+import { CustomPrompts } from '@promptforms/conversational-input/examples';
+
+function App() {
+  return <CustomPrompts />;
+}
+```
+
+**Features Demonstrated:**
+- ✅ Custom system prompts for role definition
+- ✅ Custom user prompt templates with placeholders
+- ✅ Advanced custom prompt builder functions
+- ✅ Dynamic prompt generation based on input
+- ✅ Domain-specific AI behavior customization
+- ✅ Structured data extraction with custom schemas
+
+### **6. Mistral Cloud Demo** (`MistralCloudDemo.tsx`)
+**File**: `src/examples/MistralCloudDemo.tsx`
+
+Live demo showcasing the component with Mistral Cloud AI integration for testing before download.
+
+```tsx
+import { MistralCloudDemo } from '@promptforms/conversational-input/examples';
+
+function App() {
+  return <MistralCloudDemo />;
+}
+```
+
+**Features Demonstrated:**
+- ✅ Live Mistral Cloud AI integration
+- ✅ Multiple demo modes (Basic, Custom, Advanced)
+- ✅ Interactive AI configuration
+- ✅ Real-time AI processing and responses
+- ✅ Sample inputs for testing
+- ✅ Code examples and installation instructions
+- ✅ Feature showcase and documentation
+
 ## 🚀 **Quick Start with Examples**
 
 ### **Install the Package**
@@ -172,6 +215,45 @@ function App() {
   submitTrigger="none"
   onTextChange={(text) => setFormData(prev => ({ ...prev, description: text }))}
   onFilesChange={(files) => setFormData(prev => ({ ...prev, attachments: files }))}
+/>
+```
+
+### **Custom AI Prompts**
+```tsx
+<ConversationalInput
+  onSubmit={handleSubmit}
+  aiProcessing={{
+    provider: 'openai',
+    apiKey: 'your-api-key',
+    systemPrompt: 'You are a professional HR assistant specializing in candidate evaluation.',
+    userPromptTemplate: 'Please analyze this job application:\n\n{text}\n\nAttached files: {files}',
+    extractStructuredData: true,
+    schema: {
+      "candidate_name": "Full name of the candidate",
+      "relevant_experience": "Years of relevant work experience"
+    }
+  }}
+/>
+```
+
+### **Advanced Custom Prompt Builder**
+```tsx
+<ConversationalInput
+  onSubmit={handleSubmit}
+  aiProcessing={{
+    provider: 'openai',
+    apiKey: 'your-api-key',
+    customPromptBuilder: (text, files, options) => {
+      const hasResume = files?.some(f => f.name.includes('resume'));
+      
+      return {
+        systemPrompt: `You are an expert HR recruiter with 15+ years of experience.
+        ${hasResume ? 'A resume has been provided for analysis.' : 'No resume was provided.'}`,
+        userPrompt: `CANDIDATE APPLICATION ANALYSIS REQUEST\n\nApplication Text: ${text}\n\nPlease provide a comprehensive evaluation...`
+      };
+    },
+    extractStructuredData: true
+  }}
 />
 ```
 

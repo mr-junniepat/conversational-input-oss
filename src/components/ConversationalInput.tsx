@@ -46,7 +46,10 @@ export const ConversationalInput: React.FC<ConversationalInputProps> = ({
     extractStructuredData: aiProcessing?.extractStructuredData,
     schema: aiProcessing?.schema,
     clarificationMode: aiProcessing?.clarificationMode,
-    language: aiProcessing?.language
+    language: aiProcessing?.language,
+    systemPrompt: aiProcessing?.systemPrompt,
+    userPromptTemplate: aiProcessing?.userPromptTemplate,
+    customPromptBuilder: aiProcessing?.customPromptBuilder
   });
 
   // Use controlled value if provided
@@ -245,7 +248,7 @@ export const ConversationalInput: React.FC<ConversationalInputProps> = ({
     
     if (render?.fileButton) {
       return render.fileButton({
-        onClick: () => textareaRef.current?.querySelector('input[type="file"]')?.click(),
+        onClick: () => (textareaRef.current?.querySelector('input[type="file"]') as HTMLInputElement)?.click(),
         disabled: disabled || isSubmitting,
         className: classNames.fileButton || "cursor-pointer flex items-center gap-2 px-4 py-2 rounded-lg border border-gray-200 bg-white text-gray-700 hover:bg-gray-50 transition-colors text-sm font-medium",
         acceptedTypes: acceptedFileTypes

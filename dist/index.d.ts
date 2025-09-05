@@ -25,6 +25,15 @@ interface ConversationalInputProps {
         clarificationMode?: boolean;
         /** Language for responses */
         language?: string;
+        /** Custom system prompt to override the default */
+        systemPrompt?: string;
+        /** Custom user prompt template (use {text} and {files} as placeholders) */
+        userPromptTemplate?: string;
+        /** Custom prompt builder function for advanced customization */
+        customPromptBuilder?: (text: string, files?: File[], options?: any) => {
+            systemPrompt: string;
+            userPrompt: string;
+        };
         /** Callback when AI processing is complete */
         onAIResponse?: (response: any) => void;
         /** Callback when AI processing fails */
@@ -300,6 +309,12 @@ interface ProcessingOptions {
     schema?: Record<string, any>;
     clarificationMode?: boolean;
     language?: string;
+    systemPrompt?: string;
+    userPromptTemplate?: string;
+    customPromptBuilder?: (text: string, files?: File[], options?: ProcessingOptions) => {
+        systemPrompt: string;
+        userPrompt: string;
+    };
 }
 declare class AIServiceManager {
     private providers;
@@ -323,6 +338,7 @@ declare class AIServiceManager {
     processText(providerId: string, text: string, files?: File[], options?: ProcessingOptions): Promise<AIResponse>;
     private processWithOpenAI;
     private processWithAnthropic;
+    private processWithMistral;
     private processWithLMStudio;
     private processWithOllama;
     private processWithGemini;
@@ -343,6 +359,12 @@ interface UseAIProcessingOptions {
     schema?: Record<string, any>;
     clarificationMode?: boolean;
     language?: string;
+    systemPrompt?: string;
+    userPromptTemplate?: string;
+    customPromptBuilder?: (text: string, files?: File[], options?: ProcessingOptions) => {
+        systemPrompt: string;
+        userPrompt: string;
+    };
 }
 interface UseAIProcessingReturn {
     processText: (text: string, files?: File[]) => Promise<AIResponse>;
@@ -387,6 +409,17 @@ declare const CustomStyling: React$1.FC;
  */
 declare const RenderProps: React$1.FC;
 
+/**
+ * Example demonstrating custom prompt customization
+ */
+declare const CustomPromptsExample: React$1.FC;
+
+/**
+ * Live Demo showcasing ConversationalInput with Mistral Cloud
+ * This demo allows users to test the component before downloading
+ */
+declare const MistralCloudDemo: React$1.FC;
+
 declare const AIIntegrationExample: React$1.FC;
 
 /**
@@ -405,4 +438,4 @@ declare const OpenAI: React$1.FC;
  */
 declare const LocalLLM: React$1.FC;
 
-export { AIIntegrationExample, AIProcessingResult, AIProcessor, AIProvider$1 as AIProvider, AIProviderConfig, AIResponse, AIServiceManager, AIProvider as AIServiceProvider, BasicUsage, BasicUsage as BasicUsageExample, Clarifier, ClarifierProps$1 as ClarifierProps, ClearButtonRenderProps, ConversationalInput, ConversationalInputProps, ConversationalInputState, CustomStyling, CustomStyling as CustomStylingExample, ErrorDisplayRenderProps, FileButtonRenderProps, FileDisplayRenderProps, FileUploadHook, FormIntegration, FormIntegration as FormIntegrationExample, FormIntegrationProps, LocalLLM, LocalLLM as LocalLLMExample, OpenAI, OpenAI as OpenAIExample, ProcessingOptions, RenderProps, RenderProps as RenderPropsExample, SubmitButtonRenderProps, VoiceButtonRenderProps, VoiceRecognitionHook, aiServiceManager, ConversationalInput as default, useAIProcessing, useFileUpload, useVoiceRecognition };
+export { AIIntegrationExample, AIProcessingResult, AIProcessor, AIProvider$1 as AIProvider, AIProviderConfig, AIResponse, AIServiceManager, AIProvider as AIServiceProvider, BasicUsage, BasicUsage as BasicUsageExample, Clarifier, ClarifierProps$1 as ClarifierProps, ClearButtonRenderProps, ConversationalInput, ConversationalInputProps, ConversationalInputState, CustomPromptsExample, CustomStyling, CustomStyling as CustomStylingExample, ErrorDisplayRenderProps, FileButtonRenderProps, FileDisplayRenderProps, FileUploadHook, FormIntegration, FormIntegration as FormIntegrationExample, FormIntegrationProps, LocalLLM, LocalLLM as LocalLLMExample, MistralCloudDemo, OpenAI, OpenAI as OpenAIExample, ProcessingOptions, RenderProps, RenderProps as RenderPropsExample, SubmitButtonRenderProps, VoiceButtonRenderProps, VoiceRecognitionHook, aiServiceManager, ConversationalInput as default, useAIProcessing, useFileUpload, useVoiceRecognition };

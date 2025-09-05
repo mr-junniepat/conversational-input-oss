@@ -1,11 +1,12 @@
-# conversational-ai-input
+# @junniepat/conversational-ai-input
 
 > **The most flexible conversational input component for React applications**
 
-[![npm version](https://badge.fury.io/js/conversational-ai-input.svg)](https://badge.fury.io/js/conversational-ai-input)
+[![npm version](https://badge.fury.io/js/@junniepat/conversational-ai-input.svg)](https://badge.fury.io/js/@junniepat/conversational-ai-input)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![TypeScript](https://img.shields.io/badge/TypeScript-007ACC?logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
 [![React](https://img.shields.io/badge/React-20232A?logo=react&logoColor=61DAFB)](https://reactjs.org/)
+[![GitHub](https://img.shields.io/badge/GitHub-Repository-blue?logo=github)](https://github.com/mr-junniepat/conversational-input-oss)
 
 A powerful, flexible React component that transforms any form input into a conversational, AI-ready interface. Perfect for job applications, customer support, surveys, and any scenario where you want to gather information naturally.
 
@@ -25,17 +26,17 @@ A powerful, flexible React component that transforms any form input into a conve
 ### **Installation**
 
 ```bash
-npm install conversational-ai-input
+npm install @junniepat/conversational-ai-input
 # or
-yarn add conversational-ai-input
+yarn add @junniepat/conversational-ai-input
 # or
-pnpm add conversational-ai-input
+pnpm add @junniepat/conversational-ai-input
 ```
 
 ### **Basic Usage**
 
 ```tsx
-import { ConversationalInput } from '@promptforms/conversational-input';
+import { ConversationalInput } from '@junniepat/conversational-ai-input';
 
 function MyComponent() {
   const handleSubmit = async (text: string, files?: File[]) => {
@@ -161,7 +162,7 @@ function MyComponent() {
 ### **OpenAI Integration**
 
 ```tsx
-import { ConversationalInput } from '@promptforms/conversational-input';
+import { ConversationalInput } from '@junniepat/conversational-ai-input';
 
 const processWithOpenAI = async (text: string, files?: File[]) => {
   const response = await fetch('/api/openai/process', {
@@ -202,7 +203,7 @@ const processWithLocalLLM = async (text: string) => {
 ### **Clarification System**
 
 ```tsx
-import { Clarifier } from '@promptforms/conversational-input';
+import { Clarifier } from '@junniepat/conversational-ai-input';
 
 function MyComponent() {
   const [clarification, setClarification] = useState<string | null>(null);
@@ -242,7 +243,7 @@ import {
   FormIntegration, 
   CustomStyling, 
   RenderProps 
-} from '@promptforms/conversational-input/examples';
+} from '@junniepat/conversational-ai-input/examples';
 
 // See examples in action
 <BasicUsage />
@@ -504,10 +505,17 @@ Traditional forms are rigid and frustrating. Our conversational approach makes d
 - **📱 Mobile First**: Perfect for mobile and voice-first interfaces
 - **♿ Inclusive**: Works for users with disabilities and different input preferences
 
+## 📚 **Repository & Resources**
+
+- **GitHub Repository**: [https://github.com/mr-junniepat/conversational-input-oss](https://github.com/mr-junniepat/conversational-input-oss)
+- **NPM Package**: [https://www.npmjs.com/package/@junniepat/conversational-ai-input](https://www.npmjs.com/package/@junniepat/conversational-ai-input)
+- **Issues & Support**: [GitHub Issues](https://github.com/mr-junniepat/conversational-input-oss/issues)
+- **Documentation**: See the `/src/examples` and `/src/ai-integrations` directories for usage examples
+
 ## 🚀 **Get Started Today**
 
 ```bash
-npm install @promptforms/conversational-input
+npm install @junniepat/conversational-ai-input
 ```
 
 Transform your forms from frustrating to fascinating! 🎉
@@ -516,4 +524,4 @@ Transform your forms from frustrating to fascinating! 🎉
 
 **Built with ❤️ by the PromptForms team**
 
-[GitHub](https://github.com/mr-junniepat/conversational-input-oss) • [NPM](https://www.npmjs.com/package/@promptforms/conversational-input) • [Issues](https://github.com/mr-junniepat/conversational-input-oss/issues)
+[GitHub](https://github.com/mr-junniepat/conversational-input-oss) • [NPM](https://www.npmjs.com/package/@junniepat/conversational-ai-input) • [Issues](https://github.com/mr-junniepat/conversational-input-oss/issues)

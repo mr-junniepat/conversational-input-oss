@@ -68,7 +68,7 @@ export class AIServiceManager {
     this.providers.set('lmstudio', {
       name: 'LM Studio',
       endpoint: 'http://localhost:1234/v1/chat/completions',
-      model: 'local-model',
+      model: 'openai/gpt-oss-20b',
       maxTokens: 1000,
       temperature: 0.1
     });
@@ -345,7 +345,7 @@ export class AIServiceManager {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        model: provider.model || 'local-model',
+        model: provider.model || 'openai/gpt-oss-20b',
         messages: [
           {
             role: 'system',

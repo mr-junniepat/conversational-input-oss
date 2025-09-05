@@ -612,7 +612,7 @@ class AIServiceManager {
         this.providers.set('lmstudio', {
             name: 'LM Studio',
             endpoint: 'http://localhost:1234/v1/chat/completions',
-            model: 'local-model',
+            model: 'openai/gpt-oss-20b',
             maxTokens: 1000,
             temperature: 0.1
         });
@@ -841,7 +841,7 @@ class AIServiceManager {
                 'Content-Type': 'application/json',
             },
             body: JSON.stringify({
-                model: provider.model || 'local-model',
+                model: provider.model || 'openai/gpt-oss-20b',
                 messages: [
                     {
                         role: 'system',
@@ -1368,6 +1368,14 @@ const AIProviderConfig = ({ onConfigure, currentConfig }) => {
     const [endpoint, setEndpoint] = React.useState(currentConfig?.endpoint || '');
     const [model, setModel] = React.useState(currentConfig?.model || '');
     const [isConfigured, setIsConfigured] = React.useState(false);
+    // Initialize model with default value for the selected provider
+    React.useEffect(() => {
+        if (!currentConfig?.model) {
+            const providerInfo = getProviderInfo(provider);
+            setModel(providerInfo.defaultModel);
+            setEndpoint(providerInfo.defaultEndpoint);
+        }
+    }, [provider, currentConfig?.model]);
     const handleSave = () => {
         const config = {
             provider,
@@ -1448,7 +1456,7 @@ const AIProviderConfig = ({ onConfigure, currentConfig }) => {
         }
     };
     const providerInfo = getProviderInfo(provider);
-    return (jsxRuntimeExports.jsxs("div", { className: "bg-white rounded-2xl  p-6 border border-gray-200", children: [jsxRuntimeExports.jsxs("div", { className: "flex items-center space-x-3 mb-6", children: [jsxRuntimeExports.jsx("div", { className: "w-10 h-10 bg-blue-100 rounded-xl flex items-center justify-center", children: jsxRuntimeExports.jsx(lucideReact.Settings, { className: "w-5 h-5 text-blue-600" }) }), jsxRuntimeExports.jsxs("div", { children: [jsxRuntimeExports.jsx("h3", { className: "text-xl font-semibold text-gray-900", children: "AI Provider Configuration" }), jsxRuntimeExports.jsx("p", { className: "text-gray-600", children: "Configure your AI provider for automatic processing" })] })] }), jsxRuntimeExports.jsxs("div", { className: "mb-6", children: [jsxRuntimeExports.jsx("label", { className: "block text-sm font-medium text-gray-700 mb-3", children: "Choose AI Provider" }), jsxRuntimeExports.jsx("div", { className: "grid grid-cols-2 md:grid-cols-3 gap-3", children: ['openai', 'anthropic', 'lmstudio', 'ollama', 'gemini', 'mistral'].map((providerId) => {
+    return (jsxRuntimeExports.jsxs("div", { className: "bg-white rounded-2xl  p-6 border border-gray-200", children: [jsxRuntimeExports.jsxs("div", { className: "mb-6", children: [jsxRuntimeExports.jsx("label", { className: "block text-sm font-medium text-gray-700 mb-3", children: "Choose AI Provider" }), jsxRuntimeExports.jsx("div", { className: "grid grid-cols-2 md:grid-cols-3 gap-3", children: ['openai', 'anthropic', 'lmstudio', 'ollama', 'gemini', 'mistral'].map((providerId) => {
                             const info = getProviderInfo(providerId);
                             return (jsxRuntimeExports.jsxs("button", { onClick: () => {
                                     setProvider(providerId);
@@ -2006,7 +2014,7 @@ const AIIntegrationExample = () => {
                         } }), aiResponse && (jsxRuntimeExports.jsxs("div", { className: "mt-4 p-4 bg-green-50 border border-green-200 rounded-lg", children: [jsxRuntimeExports.jsx("h4", { className: "font-semibold text-green-900 mb-2", children: "AI Extracted Data:" }), jsxRuntimeExports.jsx("pre", { className: "text-sm text-green-800 overflow-auto", children: JSON.stringify(aiResponse, null, 2) })] })), aiError && (jsxRuntimeExports.jsxs("div", { className: "mt-4 p-4 bg-red-50 border border-red-200 rounded-lg", children: [jsxRuntimeExports.jsx("h4", { className: "font-semibold text-red-900 mb-2", children: "AI Error:" }), jsxRuntimeExports.jsx("p", { className: "text-sm text-red-800", children: aiError })] }))] }), jsxRuntimeExports.jsxs("div", { className: "bg-white rounded-2xl shadow-lg p-6 border border-gray-200", children: [jsxRuntimeExports.jsx("h3", { className: "text-xl font-semibold text-gray-900 mb-4", children: "\uD83C\uDFE0 LM Studio Integration" }), jsxRuntimeExports.jsx("p", { className: "text-gray-600 mb-4", children: "Use your local LM Studio instance for privacy-focused AI processing." }), jsxRuntimeExports.jsx(ConversationalInput, { onSubmit: handleSubmit, placeholder: "Ask me anything and I'll respond using your local AI model...", aiProcessing: {
                             provider: 'lmstudio',
                             endpoint: 'http://localhost:1234/v1/chat/completions',
-                            model: 'local-model',
+                            model: 'openai/gpt-oss-20b',
                             clarificationMode: true,
                             onAIResponse: handleAIResponse,
                             onAIError: handleAIError

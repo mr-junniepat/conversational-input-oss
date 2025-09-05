@@ -97,7 +97,7 @@ export const AIIntegrationExample: React.FC = () => {
           aiProcessing={{
             provider: 'lmstudio',
             endpoint: 'http://localhost:1234/v1/chat/completions',
-            model: 'local-model',
+            model: 'openai/gpt-oss-20b',
             clarificationMode: true,
             onAIResponse: handleAIResponse,
             onAIError: handleAIError

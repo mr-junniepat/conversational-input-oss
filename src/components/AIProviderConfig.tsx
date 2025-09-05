@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { CheckCircle, AlertCircle, Settings, Key, Server } from 'lucide-react';
 
 export interface AIProviderConfigProps {
@@ -25,6 +25,15 @@ export const AIProviderConfig: React.FC<AIProviderConfigProps> = ({
   const [endpoint, setEndpoint] = useState(currentConfig?.endpoint || '');
   const [model, setModel] = useState(currentConfig?.model || '');
   const [isConfigured, setIsConfigured] = useState(false);
+
+  // Initialize model with default value for the selected provider
+  useEffect(() => {
+    if (!currentConfig?.model) {
+      const providerInfo = getProviderInfo(provider);
+      setModel(providerInfo.defaultModel);
+      setEndpoint(providerInfo.defaultEndpoint);
+    }
+  }, [provider, currentConfig?.model]);
 
   const handleSave = () => {
     const config = {

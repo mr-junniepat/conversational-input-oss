@@ -16,6 +16,9 @@ export interface UseAIProcessingOptions {
         systemPrompt: string;
         userPrompt: string;
     };
+    onAIStart?: () => void;
+    onAIResponse?: (response: any) => void;
+    onAIError?: (error: string) => void;
 }
 export interface UseAIProcessingReturn {
     processText: (text: string, files?: File[]) => Promise<AIResponse>;

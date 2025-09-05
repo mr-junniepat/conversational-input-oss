@@ -8,10 +8,7 @@
   "files": [
     "dist",
     "README.md",
-    "LICENSE",
-    "demo.html",
-    "demo-template.html",
-    "DEMO_README.md"
+    "LICENSE"
   ],
   "scripts": {
     "build": "rollup -c",
@@ -52,8 +49,8 @@
   },
   "homepage": "https://github.com/mr-junniepat/conversational-input-oss#readme",
   "peerDependencies": {
-    "react": ">=16.8.0",
-    "react-dom": ">=16.8.0"
+    "react": ">=18.0.0",
+    "react-dom": ">=18.0.0"
   },
   "devDependencies": {
     "@rollup/plugin-commonjs": "^25.0.0",

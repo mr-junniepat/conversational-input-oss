@@ -58,7 +58,7 @@ export const AIProviderConfig: React.FC<AIProviderConfigProps> = ({
           description: 'GPT models for general purpose AI',
           icon: '🤖',
           needsApiKey: true,
-          defaultModel: 'gpt-3.5-turbo',
+          defaultModel: 'gpt-4o-mini',
           defaultEndpoint: ''
         };
       case 'anthropic':
@@ -67,7 +67,7 @@ export const AIProviderConfig: React.FC<AIProviderConfigProps> = ({
           description: 'Claude models for advanced reasoning',
           icon: '🧠',
           needsApiKey: true,
-          defaultModel: 'claude-3-haiku-20240307',
+          defaultModel: 'claude-3-5-sonnet-20241022',
           defaultEndpoint: ''
         };
       case 'lmstudio':
@@ -94,7 +94,7 @@ export const AIProviderConfig: React.FC<AIProviderConfigProps> = ({
           description: 'Google\'s advanced AI models',
           icon: '💎',
           needsApiKey: true,
-          defaultModel: 'gemini-pro',
+          defaultModel: 'gemini-1.5-flash',
           defaultEndpoint: ''
         };
       case 'mistral':
@@ -103,7 +103,7 @@ export const AIProviderConfig: React.FC<AIProviderConfigProps> = ({
           description: 'Mistral\'s powerful AI models',
           icon: '🌪️',
           needsApiKey: true,
-          defaultModel: 'mistral-large-latest',
+          defaultModel: 'mistral-small-latest',
           defaultEndpoint: ''
         };
       default:

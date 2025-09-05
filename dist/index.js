@@ -367,13 +367,13 @@ function requireReactJsxRuntime_development () {
 	            return null;
 	          };
 	    React$1 = {
-	      react_stack_bottom_frame: function (callStackForError) {
+	      "react-stack-bottom-frame": function (callStackForError) {
 	        return callStackForError();
 	      }
 	    };
 	    var specialPropKeyWarningShown;
 	    var didWarnAboutElementRef = {};
-	    var unknownOwnerDebugStack = React$1.react_stack_bottom_frame.bind(
+	    var unknownOwnerDebugStack = React$1["react-stack-bottom-frame"].bind(
 	      React$1,
 	      UnknownOwner
 	    )();
@@ -728,7 +728,7 @@ class AIServiceManager {
                 'Content-Type': 'application/json',
             },
             body: JSON.stringify({
-                model: provider.model || 'gpt-3.5-turbo',
+                model: provider.model || 'gpt-4o-mini',
                 messages: [
                     {
                         role: 'system',
@@ -768,7 +768,7 @@ class AIServiceManager {
                 'anthropic-version': '2023-06-01'
             },
             body: JSON.stringify({
-                model: provider.model || 'claude-3-haiku-20240307',
+                model: provider.model || 'claude-3-5-sonnet-20241022',
                 max_tokens: provider.maxTokens || 1000,
                 temperature: provider.temperature || 0.1,
                 system: this.getSystemPrompt(options),
@@ -803,7 +803,7 @@ class AIServiceManager {
                 'Content-Type': 'application/json',
             },
             body: JSON.stringify({
-                model: provider.model || 'mistral-large-latest',
+                model: provider.model || 'mistral-small-latest',
                 messages: [
                     {
                         role: 'system',
@@ -909,7 +909,7 @@ class AIServiceManager {
     }
     async processWithGemini(provider, text, files, options = {}) {
         const prompt = this.buildPrompt(text, files, options);
-        const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${provider.model || 'gemini-pro'}:generateContent?key=${provider.apiKey}`, {
+        const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${provider.model || 'gemini-1.5-flash'}:generateContent?key=${provider.apiKey}`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -1040,6 +1040,12 @@ function useAIProcessing(options) {
             temperature: options.temperature
         });
     }, [options.provider, options.apiKey, options.endpoint, options.model, options.maxTokens, options.temperature]);
+    // Auto-configure provider when options change
+    React.useEffect(() => {
+        if (options.provider && (options.apiKey || options.endpoint)) {
+            configureProvider({});
+        }
+    }, [options.provider, options.apiKey, options.endpoint, options.model, configureProvider]);
     // Check if provider is configured
     const isConfigured = aiServiceManager.isProviderConfigured(options.provider);
     // Get available providers
@@ -1052,6 +1058,10 @@ function useAIProcessing(options) {
             // Configure provider if not already configured
             if (!isConfigured) {
                 configureProvider({});
+            }
+            // Call onAIStart callback if provided
+            if (options.onAIStart) {
+                options.onAIStart();
             }
             const processingOptions = {
                 extractStructuredData: options.extractStructuredData,
@@ -1110,7 +1120,10 @@ className = "", showClearButton = true, labels = {}, enableVoice = true, enableF
         language: aiProcessing?.language,
         systemPrompt: aiProcessing?.systemPrompt,
         userPromptTemplate: aiProcessing?.userPromptTemplate,
-        customPromptBuilder: aiProcessing?.customPromptBuilder
+        customPromptBuilder: aiProcessing?.customPromptBuilder,
+        onAIStart: aiProcessing?.onAIStart,
+        onAIResponse: aiProcessing?.onAIResponse,
+        onAIError: aiProcessing?.onAIError
     });
     // Use controlled value if provided
     const displayText = controlledValue !== undefined ? controlledValue : text;
@@ -1400,7 +1413,7 @@ const AIProviderConfig = ({ onConfigure, currentConfig }) => {
                     description: 'GPT models for general purpose AI',
                     icon: '🤖',
                     needsApiKey: true,
-                    defaultModel: 'gpt-3.5-turbo',
+                    defaultModel: 'gpt-4o-mini',
                     defaultEndpoint: ''
                 };
             case 'anthropic':
@@ -1409,7 +1422,7 @@ const AIProviderConfig = ({ onConfigure, currentConfig }) => {
                     description: 'Claude models for advanced reasoning',
                     icon: '🧠',
                     needsApiKey: true,
-                    defaultModel: 'claude-3-haiku-20240307',
+                    defaultModel: 'claude-3-5-sonnet-20241022',
                     defaultEndpoint: ''
                 };
             case 'lmstudio':
@@ -1436,7 +1449,7 @@ const AIProviderConfig = ({ onConfigure, currentConfig }) => {
                     description: 'Google\'s advanced AI models',
                     icon: '💎',
                     needsApiKey: true,
-                    defaultModel: 'gemini-pro',
+                    defaultModel: 'gemini-1.5-flash',
                     defaultEndpoint: ''
                 };
             case 'mistral':
@@ -1445,7 +1458,7 @@ const AIProviderConfig = ({ onConfigure, currentConfig }) => {
                     description: 'Mistral\'s powerful AI models',
                     icon: '🌪️',
                     needsApiKey: true,
-                    defaultModel: 'mistral-large-latest',
+                    defaultModel: 'mistral-small-latest',
                     defaultEndpoint: ''
                 };
             default:
@@ -2225,21 +2238,17 @@ exports.AIIntegrationExample = AIIntegrationExample;
 exports.AIProviderConfig = AIProviderConfig;
 exports.AIServiceManager = AIServiceManager;
 exports.BasicUsage = BasicUsage;
-exports.BasicUsageExample = BasicUsage;
 exports.Clarifier = Clarifier;
 exports.ConversationalInput = ConversationalInput;
 exports.CustomPromptsExample = CustomPromptsExample;
 exports.CustomStyling = CustomStyling;
-exports.CustomStylingExample = CustomStyling;
 exports.FormIntegration = FormIntegration;
-exports.FormIntegrationExample = FormIntegration;
 exports.LocalLLM = LocalLLM;
 exports.LocalLLMExample = LocalLLM;
 exports.MistralCloudDemo = MistralCloudDemo;
 exports.OpenAI = OpenAI;
 exports.OpenAIExample = OpenAI;
 exports.RenderProps = RenderProps;
-exports.RenderPropsExample = RenderProps;
 exports.aiServiceManager = aiServiceManager;
 exports.default = ConversationalInput;
 exports.useAIProcessing = useAIProcessing;

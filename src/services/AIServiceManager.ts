@@ -202,7 +202,7 @@ export class AIServiceManager {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        model: provider.model || 'gpt-3.5-turbo',
+        model: provider.model || 'gpt-4o-mini',
         messages: [
           {
             role: 'system',
@@ -252,7 +252,7 @@ export class AIServiceManager {
         'anthropic-version': '2023-06-01'
       },
       body: JSON.stringify({
-        model: provider.model || 'claude-3-haiku-20240307',
+        model: provider.model || 'claude-3-5-sonnet-20241022',
         max_tokens: provider.maxTokens || 1000,
         temperature: provider.temperature || 0.1,
         system: this.getSystemPrompt(options),
@@ -297,7 +297,7 @@ export class AIServiceManager {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        model: provider.model || 'mistral-large-latest',
+        model: provider.model || 'mistral-small-latest',
         messages: [
           {
             role: 'system',
@@ -435,7 +435,7 @@ export class AIServiceManager {
   ): Promise<AIResponse> {
     const prompt = this.buildPrompt(text, files, options);
     
-    const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${provider.model || 'gemini-pro'}:generateContent?key=${provider.apiKey}`, {
+    const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${provider.model || 'gemini-1.5-flash'}:generateContent?key=${provider.apiKey}`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

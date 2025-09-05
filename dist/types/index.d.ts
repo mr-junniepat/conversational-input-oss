@@ -32,6 +32,8 @@ export interface ConversationalInputProps {
             systemPrompt: string;
             userPrompt: string;
         };
+        /** Callback when AI processing starts */
+        onAIStart?: () => void;
         /** Callback when AI processing is complete */
         onAIResponse?: (response: any) => void;
         /** Callback when AI processing fails */

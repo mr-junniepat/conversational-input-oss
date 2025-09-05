@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react';
+import React, { useState, useCallback } from 'react';
 import { aiServiceManager, AIProvider, ProcessingOptions, AIResponse } from '../services/AIServiceManager';
 
 export interface UseAIProcessingOptions {
@@ -18,6 +18,9 @@ export interface UseAIProcessingOptions {
     systemPrompt: string;
     userPrompt: string;
   };
+  onAIStart?: () => void;
+  onAIResponse?: (response: any) => void;
+  onAIError?: (error: string) => void;
 }
 
 export interface UseAIProcessingReturn {
@@ -47,6 +50,13 @@ export function useAIProcessing(options: UseAIProcessingOptions): UseAIProcessin
     });
   }, [options.provider, options.apiKey, options.endpoint, options.model, options.maxTokens, options.temperature]);
 
+  // Auto-configure provider when options change
+  React.useEffect(() => {
+    if (options.provider && (options.apiKey || options.endpoint)) {
+      configureProvider({});
+    }
+  }, [options.provider, options.apiKey, options.endpoint, options.model, configureProvider]);
+
   // Check if provider is configured
   const isConfigured = aiServiceManager.isProviderConfigured(options.provider);
 
@@ -62,6 +72,11 @@ export function useAIProcessing(options: UseAIProcessingOptions): UseAIProcessin
       // Configure provider if not already configured
       if (!isConfigured) {
         configureProvider({});
+      }
+
+      // Call onAIStart callback if provided
+      if (options.onAIStart) {
+        options.onAIStart();
       }
 
       const processingOptions: ProcessingOptions = {

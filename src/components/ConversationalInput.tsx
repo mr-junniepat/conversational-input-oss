@@ -49,7 +49,10 @@ export const ConversationalInput: React.FC<ConversationalInputProps> = ({
     language: aiProcessing?.language,
     systemPrompt: aiProcessing?.systemPrompt,
     userPromptTemplate: aiProcessing?.userPromptTemplate,
-    customPromptBuilder: aiProcessing?.customPromptBuilder
+    customPromptBuilder: aiProcessing?.customPromptBuilder,
+    onAIStart: aiProcessing?.onAIStart,
+    onAIResponse: aiProcessing?.onAIResponse,
+    onAIError: aiProcessing?.onAIError
   });
 
   // Use controlled value if provided

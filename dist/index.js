@@ -835,28 +835,32 @@ class AIServiceManager {
     }
     async processWithLMStudio(provider, text, files, options = {}) {
         const prompt = this.buildPrompt(text, files, options);
-        const response = await fetch(provider.endpoint, {
+        // Try to avoid CORS preflight by using a simpler request
+        const requestBody = JSON.stringify({
+            model: provider.model || 'openai/gpt-oss-20b',
+            messages: [
+                {
+                    role: 'system',
+                    content: this.getSystemPrompt(options)
+                },
+                {
+                    role: 'user',
+                    content: prompt
+                }
+            ],
+            max_tokens: provider.maxTokens || 1000,
+            temperature: provider.temperature || 0.1,
+            stream: false
+            // Note: Local models don't support response_format, so we omit it
+        });
+        // Use Next.js API route as proxy to avoid CORS issues
+        const proxyEndpoint = '/api/lmstudio';
+        const response = await fetch(proxyEndpoint, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
             },
-            body: JSON.stringify({
-                model: provider.model || 'openai/gpt-oss-20b',
-                messages: [
-                    {
-                        role: 'system',
-                        content: this.getSystemPrompt(options)
-                    },
-                    {
-                        role: 'user',
-                        content: prompt
-                    }
-                ],
-                max_tokens: provider.maxTokens || 1000,
-                temperature: provider.temperature || 0.1,
-                stream: false
-                // Note: Local models don't support response_format, so we omit it
-            })
+            body: requestBody
         });
         if (!response.ok) {
             throw new Error(`LM Studio API error: ${response.status} ${response.statusText}`);

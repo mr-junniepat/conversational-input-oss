@@ -121,14 +121,12 @@ export const AIProviderConfig: React.FC<AIProviderConfigProps> = ({
   const providerInfo = getProviderInfo(provider);
 
   return (
-    <div className="bg-white rounded-2xl  p-6 border border-gray-200">
+    <div className="bg-white">
     
 
       {/* Provider Selection */}
       <div className="mb-6">
-        <label className="block text-sm font-medium text-gray-700 mb-3">
-          Choose AI Provider
-        </label>
+      
         <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
           {['openai', 'anthropic', 'lmstudio', 'ollama', 'gemini', 'mistral'].map((providerId) => {
             const info = getProviderInfo(providerId);

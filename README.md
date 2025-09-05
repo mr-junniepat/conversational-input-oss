@@ -1,4 +1,4 @@
-# 🎯 **@promptforms/conversational-input**
+# 🎯 **@junniepat/conversational-input**
 
 > **The most flexible conversational input component for React applications**
 
@@ -6,6 +6,9 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![TypeScript](https://img.shields.io/badge/TypeScript-007ACC?logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
 [![React](https://img.shields.io/badge/React-20232A?logo=react&logoColor=61DAFB)](https://reactjs.org/)
+
+<img width="871" height="454" alt="Screenshot 2025-09-03 at 2 50 14 AM" src="https://github.com/user-attachments/assets/7690e1d8-067c-45cb-860e-3e6d16c13973" />
+
 
 A powerful, flexible React component that transforms any form input into a conversational, AI-ready interface. Perfect for job applications, customer support, surveys, and any scenario where you want to gather information naturally.
 

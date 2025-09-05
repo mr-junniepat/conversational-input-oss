@@ -113,15 +113,7 @@ export const AIProviderConfig: React.FC<AIProviderConfigProps> = ({
 
   return (
     <div className="bg-white rounded-2xl  p-6 border border-gray-200">
-      <div className="flex items-center space-x-3 mb-6">
-        <div className="w-10 h-10 bg-blue-100 rounded-xl flex items-center justify-center">
-          <Settings className="w-5 h-5 text-blue-600" />
-        </div>
-        <div>
-          <h3 className="text-xl font-semibold text-gray-900">AI Provider Configuration</h3>
-          <p className="text-gray-600">Configure your AI provider for automatic processing</p>
-        </div>
-      </div>
+    
 
       {/* Provider Selection */}
       <div className="mb-6">

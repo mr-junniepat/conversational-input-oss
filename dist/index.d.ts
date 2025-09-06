@@ -155,6 +155,7 @@ interface SubmitButtonRenderProps {
     onClick: () => void;
     disabled: boolean;
     className: string;
+    style?: React.CSSProperties;
     isSubmitting: boolean;
     text: string;
 }

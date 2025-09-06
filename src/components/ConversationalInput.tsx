@@ -293,6 +293,18 @@ export const ConversationalInput: React.FC<ConversationalInputProps> = ({
         onClick: handleSubmit,
         disabled: isSubmitDisabled,
         className: classNames.submitButton || "px-6 py-2 rounded-lg bg-black text-white hover:bg-gray-900 transition-colors text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed",
+        style: !classNames.submitButton ? {
+          backgroundColor: isSubmitDisabled ? '#6b7280' : '#000000',
+          color: '#ffffff',
+          border: 'none',
+          opacity: isSubmitDisabled ? 0.5 : 1,
+          cursor: isSubmitDisabled ? 'not-allowed' : 'pointer',
+          padding: '8px 24px',
+          borderRadius: '8px',
+          fontSize: '14px',
+          fontWeight: '500',
+          transition: 'all 0.2s'
+        } : undefined,
         isSubmitting,
         text: finalLabels.submit
       });
@@ -303,6 +315,30 @@ export const ConversationalInput: React.FC<ConversationalInputProps> = ({
         onClick={handleSubmit}
         disabled={isSubmitDisabled}
         className="px-6 py-2 rounded-lg bg-black text-white hover:bg-gray-900 transition-colors text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+        style={{
+          backgroundColor: isSubmitDisabled ? '#6b7280' : '#000000',
+          color: '#ffffff',
+          border: 'none',
+          opacity: isSubmitDisabled ? 0.5 : 1,
+          cursor: isSubmitDisabled ? 'not-allowed' : 'pointer',
+          ...(!classNames.submitButton && {
+            padding: '8px 24px',
+            borderRadius: '8px',
+            fontSize: '14px',
+            fontWeight: '500',
+            transition: 'all 0.2s'
+          })
+        }}
+        onMouseEnter={(e) => {
+          if (!isSubmitDisabled && !classNames.submitButton) {
+            e.currentTarget.style.backgroundColor = '#374151';
+          }
+        }}
+        onMouseLeave={(e) => {
+          if (!isSubmitDisabled && !classNames.submitButton) {
+            e.currentTarget.style.backgroundColor = '#000000';
+          }
+        }}
       >
         {isSubmitting ? (
           <>

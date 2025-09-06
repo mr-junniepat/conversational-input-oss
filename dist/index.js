@@ -1291,12 +1291,12 @@ className = "", showClearButton = true, labels = {}, enableVoice = true, enableF
             return render.submitButton({
                 onClick: handleSubmit,
                 disabled: isSubmitDisabled,
-                className: classNames.submitButton || "px-6 py-2 rounded-lg bg-gray-800 text-white hover:bg-gray-900 transition-colors text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed",
+                className: classNames.submitButton || "px-6 py-2 rounded-lg bg-black text-white hover:bg-gray-900 transition-colors text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed",
                 isSubmitting,
                 text: finalLabels.submit
             });
         }
-        return (jsxRuntimeExports.jsx("button", { onClick: handleSubmit, disabled: isSubmitDisabled, className: "px-6 py-2 rounded-lg bg-gray-800 text-white hover:bg-gray-900 transition-colors text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed", children: isSubmitting ? (jsxRuntimeExports.jsxs(jsxRuntimeExports.Fragment, { children: [jsxRuntimeExports.jsx(lucideReact.Loader2, { className: "w-4 h-4 animate-spin inline mr-2" }), "Processing..."] })) : (finalLabels.submit) }));
+        return (jsxRuntimeExports.jsx("button", { onClick: handleSubmit, disabled: isSubmitDisabled, className: "px-6 py-2 rounded-lg bg-black text-white hover:bg-gray-900 transition-colors text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed", children: isSubmitting ? (jsxRuntimeExports.jsxs(jsxRuntimeExports.Fragment, { children: [jsxRuntimeExports.jsx(lucideReact.Loader2, { className: "w-4 h-4 animate-spin inline mr-2" }), "Processing..."] })) : (finalLabels.submit) }));
     };
     const renderClearButton = () => {
         if (!showClearButton || !fullText)

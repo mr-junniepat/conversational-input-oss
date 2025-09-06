@@ -292,7 +292,7 @@ export const ConversationalInput: React.FC<ConversationalInputProps> = ({
       return render.submitButton({
         onClick: handleSubmit,
         disabled: isSubmitDisabled,
-        className: classNames.submitButton || "px-6 py-2 rounded-lg bg-gray-800 text-white hover:bg-gray-900 transition-colors text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed",
+        className: classNames.submitButton || "px-6 py-2 rounded-lg bg-black text-white hover:bg-gray-900 transition-colors text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed",
         isSubmitting,
         text: finalLabels.submit
       });
@@ -302,7 +302,7 @@ export const ConversationalInput: React.FC<ConversationalInputProps> = ({
       <button
         onClick={handleSubmit}
         disabled={isSubmitDisabled}
-        className="px-6 py-2 rounded-lg bg-gray-800 text-white hover:bg-gray-900 transition-colors text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+        className="px-6 py-2 rounded-lg bg-black text-white hover:bg-gray-900 transition-colors text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed"
       >
         {isSubmitting ? (
           <>

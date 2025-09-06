@@ -1249,11 +1249,13 @@ className = "", showClearButton = true, labels = {}, enableVoice = true, enableF
     };
     const finalLabels = { ...defaultLabels, ...labels };
     // Determine if submit should be disabled
-    const isSubmitDisabled = !fullText.trim() ||
+    const isSubmitDisabled = Boolean(!fullText.trim() ||
         (requireFiles && files.length === 0) ||
         isSubmitting ||
         disabled ||
-        submitTrigger === 'none';
+        submitTrigger === 'none' ||
+        (aiProcessing && !aiProcessingHook.isConfigured) // Disable if AI processing is expected but not configured
+    );
     // Render custom components if provided
     const renderVoiceButton = () => {
         if (!enableVoice || !voiceSupported)

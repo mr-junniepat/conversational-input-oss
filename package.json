@@ -38,7 +38,11 @@
     "conversational-forms",
     "mistral"
   ],
-  "author": "Patrick Igwe <junniepat@gmail.com>",
+  "author": {
+    "name": "Patrick Igwe",
+    "email": "junniepat@gmail.com",
+    "url": "https://www.linkedin.com/in/patrick-igwe/"
+  },
   "license": "MIT",
   "repository": {
     "type": "git",
@@ -47,7 +51,7 @@
   "bugs": {
     "url": "https://github.com/mr-junniepat/conversational-input-oss/issues"
   },
-  "homepage": "https://github.com/mr-junniepat/conversational-input-oss#readme",
+  "homepage": "https://promptforms-hr.vercel.app/ai-demo",
   "peerDependencies": {
     "react": ">=18.0.0",
     "react-dom": ">=18.0.0"

@@ -1,10 +1,6 @@
 # @junniepat/conversational-ai-input
 
-> **The most flexible conversational input component for React applications**
-
-## 🚀 **[Try Live Demo →](https://promptforms-hr.vercel.app/ai-demo)**
-
-Experience the full power of conversational AI forms in action! Configure your AI provider and see how natural language transforms into structured data.
+> **Transform rigid forms into engaging conversations with AI-powered intelligence**
 
 [![npm version](https://badge.fury.io/js/@junniepat/conversational-ai-input.svg)](https://badge.fury.io/js/@junniepat/conversational-ai-input)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
@@ -12,6 +8,38 @@ Experience the full power of conversational AI forms in action! Configure your A
 [![React](https://img.shields.io/badge/React-20232A?logo=react&logoColor=61DAFB)](https://reactjs.org/)
 [![GitHub](https://img.shields.io/badge/GitHub-Repository-blue?logo=github)](https://github.com/mr-junniepat/conversational-input-oss)
 [![Live Demo](https://img.shields.io/badge/Live_Demo-Try_Now-purple?logo=vercel)](https://promptforms-hr.vercel.app/ai-demo)
+
+## 🚀 **[Try Live Demo →](https://promptforms-hr.vercel.app/ai-demo)**
+
+**Experience the future of form interactions!** Our live demo showcases real AI processing with Mistral Cloud - no setup required.
+
+### 🎯 **What You'll See:**
+- ✅ **Real AI Processing** - Watch natural language transform into structured data
+- ✅ **Voice Input** - Speak naturally and see instant transcription
+- ✅ **File Uploads** - Drag & drop documents for AI analysis
+- ✅ **Multiple AI Providers** - Test with OpenAI, Anthropic, Mistral, and more
+- ✅ **Interactive Configuration** - Try different models and settings
+
+### 🚀 **Quick Start**
+```bash
+npm install @junniepat/conversational-ai-input
+```
+
+```tsx
+import { ConversationalInput } from '@junniepat/conversational-ai-input';
+
+function App() {
+  return (
+    <ConversationalInput
+      aiProvider="mistral"
+      apiKey="your-api-key"
+      onSubmit={(data) => console.log('Extracted:', data)}
+    />
+  );
+}
+```
+
+**Ready to transform your forms?** [Try the live demo →](https://promptforms-hr.vercel.app/ai-demo)
 
 <img width="871" height="454" alt="Screenshot 2025-09-03 at 2 50 14 AM" src="https://github.com/user-attachments/assets/7690e1d8-067c-45cb-860e-3e6d16c13973" />
 
@@ -514,13 +542,31 @@ npm run test
 
 MIT License - see [LICENSE](LICENSE) file for details.
 
-## 🆘 **Support**
+## 🆘 **Support & Contact**
 
-- **Documentation**: [Full API Reference](https://github.com/mr-junniepat/conversational-input-oss)
-- **Examples**: [Live Examples](https://github.com/mr-junniepat/conversational-input-oss/tree/main/src/examples)
-- **AI Integration**: [AI Integration Guide](https://github.com/mr-junniepat/conversational-input-oss/tree/main/src/ai-integrations)
-- **Issues**: [GitHub Issues](https://github.com/mr-junniepat/conversational-input-oss/issues)
-- **Discussions**: [GitHub Discussions](https://github.com/mr-junniepat/conversational-input-oss/discussions)
+### **📞 Get Help**
+- **🐛 Bug Reports**: [GitHub Issues](https://github.com/mr-junniepat/conversational-input-oss/issues)
+- **💬 Questions**: [GitHub Discussions](https://github.com/mr-junniepat/conversational-input-oss/discussions)
+- **📖 Documentation**: [Full API Reference](https://github.com/mr-junniepat/conversational-input-oss)
+- **🎯 Examples**: [Live Examples](https://github.com/mr-junniepat/conversational-input-oss/tree/main/src/examples)
+- **🤖 AI Integration**: [AI Integration Guide](https://github.com/mr-junniepat/conversational-input-oss/tree/main/src/ai-integrations)
+
+### **👨‍💻 Author & Creator**
+**Patrick Igwe** - Full-Stack Developer & AI Enthusiast
+
+- 🔗 **LinkedIn**: [Patrick Igwe](https://www.linkedin.com/in/patrick-igwe/)
+- 📧 **Email**: [junniepat@gmail.com](mailto:junniepat@gmail.com)
+- 🐙 **GitHub**: [@mr-junniepat](https://github.com/mr-junniepat)
+- 🌐 **Portfolio**: [PromptForms](https://promptforms-hr.vercel.app/)
+
+### **💼 Professional Services**
+Need help implementing conversational AI in your project? I offer:
+- 🎯 **Custom Implementation** - Tailored solutions for your use case
+- 🏢 **Enterprise Integration** - Large-scale deployments and consulting
+- 🎓 **Training & Workshops** - Team training on conversational UI best practices
+- 🚀 **Technical Consulting** - Architecture and AI strategy guidance
+
+**Let's connect on LinkedIn to discuss your project!** [Connect with Patrick →](https://www.linkedin.com/in/patrick-igwe/)
 
 ## 🌟 **Why Conversational Input?**
 

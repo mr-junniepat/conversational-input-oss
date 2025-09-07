@@ -17,12 +17,13 @@ const config: StorybookConfig = {
   },
   viteFinal: async (config) => {
     // Fix PostCSS configuration for Vite compatibility
-    if (config.css?.postcss) {
-      config.css.postcss.plugins = {
+    config.css = config.css || {};
+    config.css.postcss = {
+      plugins: {
         tailwindcss: {},
         autoprefixer: {},
-      };
-    }
+      },
+    };
     
     return config;
   },

@@ -11,6 +11,32 @@ export { useAIProcessing } from './hooks/useAIProcessing';
 // AI Services
 export { AIServiceManager, aiServiceManager } from './services/AIServiceManager';
 
+// Security utilities
+export { 
+  SecurityManager, 
+  defaultSecurityManager,
+  sanitizeText,
+  validateText,
+  detectPii,
+  isVoiceSafe
+} from './utils/security';
+
+// Audit utilities
+export { 
+  AuditLogger, 
+  defaultAuditLogger,
+  logFormSubmission,
+  logAIProcessing
+} from './utils/audit';
+
+// Model routing
+export { 
+  ModelRouter, 
+  defaultModelRouter,
+  routeRequest,
+  executeRequest
+} from './utils/modelRouter';
+
 // Examples
 export * from './examples';
 

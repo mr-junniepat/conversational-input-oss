@@ -1,9 +1,12 @@
 import React, { useState, useCallback, useEffect, useRef } from 'react';
-import { Mic, Upload, Loader2, XCircle, FileText } from 'lucide-react';
+import { Mic, Upload, Loader2, XCircle, FileText, Shield, AlertTriangle } from 'lucide-react';
 import { ConversationalInputProps } from '../types';
 import { useVoiceRecognition } from '../hooks/useVoiceRecognition';
 import { useFileUpload } from '../hooks/useFileUpload';
 import { useAIProcessing } from '../hooks/useAIProcessing';
+import { SecurityManager, validateText, isVoiceSafe } from '../utils/security';
+import { logFormSubmission, logAIProcessing } from '../utils/audit';
+import { routeRequest, executeRequest } from '../utils/modelRouter';
 
 export const ConversationalInput: React.FC<ConversationalInputProps> = ({
   onSubmit,
@@ -33,7 +36,20 @@ export const ConversationalInput: React.FC<ConversationalInputProps> = ({
 }) => {
   const [text, setText] = useState(initialValue);
   const [error, setError] = useState<string | null>(null);
+  const [securityWarnings, setSecurityWarnings] = useState<string[]>([]);
+  const [validationResult, setValidationResult] = useState<any>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+  
+  // Security manager
+  const securityManager = useRef(new SecurityManager({
+    enablePiiDetection: true,
+    enableProfanityFilter: true,
+    enablePromptInjectionDefense: true,
+    minLength: 10,
+    maxLength: 5000,
+    allowedFileTypes: acceptedFileTypes,
+    maxFileSize: maxFileSize
+  })).current;
 
   // AI Processing hook
   const aiProcessingHook = useAIProcessing({
@@ -78,13 +94,36 @@ export const ConversationalInput: React.FC<ConversationalInputProps> = ({
   // Merge voice transcript with typed text
   const fullText = displayText + (isListening ? transcript : '');
 
-  // Handle text changes
+  // Handle text changes with security validation
   const handleTextChange = useCallback((newText: string) => {
-    if (controlledValue === undefined) {
-      setText(newText);
+    // Sanitize input
+    const sanitizedText = securityManager.sanitizeInput(newText);
+    
+    // Validate input
+    const validation = securityManager.validateInput(sanitizedText);
+    setValidationResult(validation);
+    
+    // Set security warnings
+    const warnings: string[] = [];
+    if (validation.warnings.length > 0) {
+      warnings.push(...validation.warnings);
     }
-    onTextChange?.(newText);
-  }, [controlledValue, onTextChange]);
+    
+    // Check voice safety
+    if (enableVoice && !isVoiceSafe()) {
+      warnings.push('Voice input requires HTTPS in production');
+    }
+    
+    setSecurityWarnings(warnings);
+    
+    // Set text and error
+    if (controlledValue === undefined) {
+      setText(sanitizedText);
+    }
+    setError(validation.isValid ? null : validation.errors[0] || null);
+    
+    onTextChange?.(sanitizedText);
+  }, [controlledValue, onTextChange, securityManager, enableVoice]);
 
   // Handle file changes
   const handleFilesChange = useCallback((newFiles: File[]) => {
@@ -448,6 +487,26 @@ export const ConversationalInput: React.FC<ConversationalInputProps> = ({
             </div>
           )}
         </div>
+
+        {/* Security Warnings */}
+        {securityWarnings.length > 0 && (
+          <div className="px-6 py-3 bg-yellow-50 border-t border-yellow-200">
+            <div className="flex items-start gap-2">
+              <Shield className="w-4 h-4 text-yellow-500 mt-0.5 flex-shrink-0" />
+              <div className="flex-1">
+                <div className="text-sm font-medium text-yellow-800 mb-1">Security Notice</div>
+                <div className="space-y-1">
+                  {securityWarnings.map((warning, index) => (
+                    <div key={index} className="flex items-center gap-2 text-sm text-yellow-700">
+                      <AlertTriangle className="w-3 h-3 flex-shrink-0" />
+                      <span>{warning}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* Action Bar - Only show if there are actions to display */}
         {(enableVoice || enableFileUpload || showSubmitButton || (showClearButton && fullText)) && (

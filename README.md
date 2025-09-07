@@ -473,10 +473,64 @@ const processFiles = async (files: File[]) => {
 
 ## 🔒 **Security & Privacy**
 
+### **⚠️ Critical Security Notes**
+
+**NEVER call Ollama directly from the browser!** Always use server-side proxy routes:
+
+```tsx
+// ❌ DANGEROUS - Don't do this
+const response = await fetch('http://localhost:11434/api/generate', {
+  method: 'POST',
+  body: JSON.stringify({ model: 'mixtral', prompt: text })
+});
+
+// ✅ SAFE - Use server proxy
+const response = await fetch('/api/ollama/process', {
+  method: 'POST',
+  body: JSON.stringify({ text, files })
+});
+```
+
+### **Server-Side Proxy Example (Next.js)**
+
+```typescript
+// pages/api/ollama/process.ts
+export default async function handler(req: NextApiRequest, res: NextApiResponse) {
+  const { text, files } = req.body;
+  
+  const response = await fetch('http://localhost:11434/api/generate', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      model: 'mixtral',
+      prompt: `Extract structured data: ${text}`,
+      stream: false
+    })
+  });
+  
+  const result = await response.json();
+  res.json({ extractedData: JSON.parse(result.response) });
+}
+```
+
+### **Built-in Security Features**
+
+- **🔒 SSR-Safe Voice**: Auto-hides microphone on non-HTTPS origins
+- **🛡️ Prompt Injection Defense**: Sanitizes user input and strips system prompts
+- **📊 PII Detection**: Built-in detection of emails, phones, SSNs
+- **🚫 Profanity Filter**: Configurable content filtering
+- **📏 Input Validation**: Minimum character requirements and length limits
+- **🔐 Data Minimization**: Only collects fields defined in schema
+- **⏰ Configurable Retention**: Field-level TTLs and org-scoped policies
+
+### **Privacy & Compliance**
+
 - **No External Dependencies**: Works completely offline
 - **Local Processing**: Voice and file processing happen in browser
 - **No Data Collection**: Zero telemetry or analytics
-- **Privacy First**: Perfect for sensitive applications
+- **GDPR Ready**: Built-in consent management and data export
+- **Audit Logs**: Immutable logs for compliance (EEOC, GDPR)
+- **Encryption**: PII encrypted at rest with configurable keys
 
 ## 🤝 **Contributing**
 

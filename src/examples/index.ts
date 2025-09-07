@@ -6,3 +6,4 @@ export { RenderProps } from './RenderProps';
 export { CustomPromptsExample } from './CustomPrompts';
 export { MistralCloudDemo } from './MistralCloudDemo';
 export { AIIntegrationExample } from './AIIntegration';
+export { NextJSOllama, NextJSOllamaExample } from './NextJSOllama';

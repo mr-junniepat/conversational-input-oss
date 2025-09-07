@@ -1,0 +1,20 @@
+@import "tailwindcss";
+
+/* Force include classes for Storybook */
+.force-include-classes {
+  @apply bg-black hover:bg-gray-900 disabled:opacity-50 disabled:cursor-not-allowed;
+  display: none;
+}
+
+:root {
+  --background: #ffffff;
+  --foreground: #171717;
+}
+
+/* Storybook specific styles */
+.sb-show-main {
+  background: #f9fafb;
+}
+
+/* Ensure proper font loading */
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap');

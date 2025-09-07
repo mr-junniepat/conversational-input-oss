@@ -37,8 +37,8 @@ export {
   executeRequest
 } from './utils/modelRouter';
 
-// Examples
-export * from './examples';
+// Examples (optional - for developers who want to see implementation patterns)
+// export * from './examples';
 
 // AI Integrations
 export * from './ai-integrations';

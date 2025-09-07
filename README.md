@@ -54,24 +54,6 @@ function App() {
 
 A powerful, flexible React component that transforms any form input into a conversational, AI-ready interface. Perfect for job applications, customer support, surveys, and any scenario where you want to gather information naturally.
 
-## 🎯 **Try the Live Demo**
-
-Experience the component in action with our interactive demo powered by Mistral Cloud AI:
-
-```tsx
-import { MistralCloudDemo } from '@junniepat/conversational-ai-input/examples';
-
-function App() {
-  return <MistralCloudDemo />;
-}
-```
-
-The demo includes:
-- ✅ **Live AI Processing** with Mistral Cloud
-- ✅ **Multiple Demo Modes** (Basic, Custom Prompts, Advanced)
-- ✅ **Interactive Configuration** for testing different setups
-- ✅ **Sample Inputs** to try various scenarios
-- ✅ **Code Examples** and installation instructions
 
 ## ✨ **Features**
 
@@ -84,41 +66,6 @@ The demo includes:
 - 🔒 **Privacy First**: Works offline and with local LLMs
 - ⚡ **Lightweight**: Only ~15KB gzipped
 
-## 🚀 **Quick Start**
-
-### **Installation**
-
-```bash
-npm install @junniepat/conversational-ai-input
-# or
-yarn add @junniepat/conversational-ai-input
-# or
-pnpm add @junniepat/conversational-ai-input
-```
-
-### **Basic Usage**
-
-```tsx
-import { ConversationalInput } from '@junniepat/conversational-ai-input';
-
-function MyComponent() {
-  const handleSubmit = async (text: string, files?: File[]) => {
-    console.log('Text:', text);
-    console.log('Files:', files);
-    
-    // Process with your AI service
-    const result = await processWithAI(text, files);
-    console.log('AI Result:', result);
-  };
-
-  return (
-    <ConversationalInput
-      onSubmit={handleSubmit}
-      placeholder="Tell me about your experience..."
-    />
-  );
-}
-```
 
 ## 🎯 **Use Cases**
 
@@ -563,7 +510,6 @@ MIT License - see [LICENSE](LICENSE) file for details.
 **Patrick Igwe** - Full-Stack Developer & AI Enthusiast
 
 - 🔗 **LinkedIn**: [Patrick Igwe](https://www.linkedin.com/in/patrick-igwe/)
-- 📧 **Email**: [junniepat@gmail.com](mailto:junniepat@gmail.com)
 - 🐙 **GitHub**: [@mr-junniepat](https://github.com/mr-junniepat)
 - 🌐 **Portfolio**: [PromptForms](https://promptforms-hr.vercel.app/)
 
@@ -586,23 +532,8 @@ Traditional forms are rigid and frustrating. Our conversational approach makes d
 - **📱 Mobile First**: Perfect for mobile and voice-first interfaces
 - **♿ Inclusive**: Works for users with disabilities and different input preferences
 
-## 📚 **Repository & Resources**
-
-- **GitHub Repository**: [https://github.com/mr-junniepat/conversational-input-oss](https://github.com/mr-junniepat/conversational-input-oss)
-- **NPM Package**: [https://www.npmjs.com/package/@junniepat/conversational-ai-input](https://www.npmjs.com/package/@junniepat/conversational-ai-input)
-- **Issues & Support**: [GitHub Issues](https://github.com/mr-junniepat/conversational-input-oss/issues)
-- **Documentation**: See the `/src/examples` and `/src/ai-integrations` directories for usage examples
-
-## 🚀 **Get Started Today**
-
-```bash
-npm install @junniepat/conversational-ai-input
-```
-
-Transform your forms from frustrating to fascinating! 🎉
-
 ---
 
-**Built with ❤️ by the PromptForms team**
+**Built with ❤️ by [Patrick Igwe](https://www.linkedin.com/in/patrick-igwe/)**
 
-[GitHub](https://github.com/mr-junniepat/conversational-input-oss) • [NPM](https://www.npmjs.com/package/@junniepat/conversational-ai-input) • [Issues](https://github.com/mr-junniepat/conversational-input-oss/issues)
+[GitHub](https://github.com/mr-junniepat/conversational-input-oss) • [NPM](https://www.npmjs.com/package/@junniepat/conversational-ai-input) • [Live Demo](https://promptforms-hr.vercel.app/ai-demo)
